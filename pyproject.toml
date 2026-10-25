@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "paperos"
+version = "0.0.1"
+description = "Live-programmable paper interfaces"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "opencv-python",
+    "mediapipe",
+    "sounddevice",
+    "pynput",
+    "openai",          # Meta Model API is OpenAI-SDK compatible; verify base URL at kickoff
+    "pydantic>=2",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[project.scripts]
+paperos = "paperos.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100

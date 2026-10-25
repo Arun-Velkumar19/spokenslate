@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+.env
+
+# raw captures stay local; trial logs in eval/results are committed
+data/captures/
+*.mp4
+*.wav
+.DS_Store
+
+# mediapipe model files (download per README)
+models/*.task
