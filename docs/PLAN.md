@@ -19,6 +19,8 @@ Oct 26 – Nov 4, 2026. Solo. Submission deadline Nov 4, 9:00 PM ET = **7:00 PM 
 - [ ] Run `scripts/page_preview.py` on the real camera; set rotation in `.env`; save 5 snapshots of hand-drawn layouts
 - [ ] First Muse compile on a saved snapshot (confirm API base URL, model IDs, image input)
 - [ ] Acoustic tap experiment (bare desk vs mousepad; narration/typing false triggers)
+  - [x] Onset detector + `scripts/tap_test.py` (17 synthetic-audio tests)
+  - [ ] Run on the real mic: `--intent tap` 30 trials per surface, then `speech` / `typing` / `bump`; log to `eval/press_trials.csv`
 - [ ] bitrun: confirm keys in-game, shield hold vs tap
 
 ## Calendar

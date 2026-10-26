@@ -4,7 +4,7 @@
 
 PaperOS makes a paper interface *live-programmable*. Draw controls on an ordinary sheet of paper, a Meta model compiles the drawing into a validated control spec, and the paper stays the physical controller. Edit it with a pen mid-session and the behavior updates without restarting the target app.
 
-> Status (Oct 26): implemented and tested: `spec`, `validator`, `runtime/engine`, `adapters/keyboard`, `calibration/page`. `compiler` written but untested against the live API. Stubs: sensing, edits, overlay, main loop.
+> Status (Oct 26): implemented and tested: `spec`, `validator`, `runtime/engine`, `adapters/keyboard`, `calibration/page`, `sensing/acoustic`. `compiler` written but untested against the live API. Stubs: hand tracking, press fusion, edits, overlay, main loop.
 
 ## How it works
 

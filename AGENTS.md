@@ -47,7 +47,8 @@ invented paper controllers.
 | `spec.py`, `validator.py`, `runtime/engine.py`, `adapters/keyboard.py` | done, tested |
 | `calibration/page.py` + `scripts/page_preview.py` | done, tested on synthetic frames; **not yet verified on a real camera** (PR #1) |
 | `compiler/client.py`, `compiler/prompts.py` | written; **untested against the live Meta API** (base URL, model ids, image format unconfirmed) |
-| `sensing/hand.py`, `sensing/acoustic.py`, `sensing/press.py` | stubs |
+| `sensing/acoustic.py` + `scripts/tap_test.py` | done, tested on synthetic audio (taps, speech, typing); **not yet verified on a real mic**: run the day-1 experiment, log to `eval/press_trials.csv` |
+| `sensing/hand.py`, `sensing/press.py` | stubs |
 | `runtime/edits.py`, `overlay.py`, `main.py` loop | stubs |
 
 Schedule, gates and today's checklist: `docs/PLAN.md`. Demo shot list: `docs/DEMO.md`.
@@ -63,12 +64,12 @@ src/paperos/
   runtime/edits.py     stable-edit detection -> trigger recompile        [stub]
   calibration/page.py  page detect, PageTracker, to_page/to_camera, rectify
   sensing/hand.py      MediaPipe fingertip + hand_present                 [stub]
-  sensing/acoustic.py  mic tap onsets                                     [stub]
+  sensing/acoustic.py  mic tap onsets (OnsetDetector pure, TapDetector = mic stream)
   sensing/press.py     fuse fingertip + onsets/dwell -> InputEvents       [stub]
   compiler/            Muse client + prompts (compile, diff recompile)
   overlay.py           on-screen overlay (regions, rationale, status)     [stub]
   main.py              wiring
-scripts/               dev tools (page_preview.py)
+scripts/               dev tools (page_preview.py, tap_test.py)
 tests/                 pytest, all runnable without camera/mic/API
 eval/                  CSV logs for acceptance gates (commit results)
 docs/                  PLAN, DEMO, PRIOR_ART
@@ -82,6 +83,7 @@ pip install -e ".[dev]"
 pytest -q                      # must pass before every commit
 ruff check src tests scripts   # must be clean
 python scripts/page_preview.py # needs a webcam
+python scripts/tap_test.py     # needs a mic; --trials N --intent tap --layout bare-desk logs to eval/
 ```
 
 ## Conventions
@@ -116,6 +118,12 @@ python scripts/page_preview.py # needs a webcam
   direction slider. Never require a physical press-and-hold on paper.
 - Narration triggers acoustic taps: voiceover is recorded separately; every acoustic onset
   must be fused with a fingertip-in-region check.
+- Acoustic onsets need a fast rise **and** a fast decay of the 16 ms envelope. Raw 4 ms
+  frames are shorter than a pitch period, so voiced speech looks like a train of transients
+  without the smoothing. Key clicks pass the default gates; `TapConfig.max_centroid_hz`
+  can reject them, but pick its value from real recordings (`tap_test.py` prints centroids).
+- `TapDetector.poll()` timestamps are `time.monotonic()` at the onset (from PortAudio ADC
+  time), not when the onset was confirmed (+20-50 ms). Match them to camera frame times.
 - Meta Model API: OpenAI-SDK compatible per reports; **verify** base URL, model ids
   (`muse-spark-1.1`, `muse-wonder-1.0`), image input, and structured-output support before
   building on them. Set a spending cap; never put retry loops around paid calls without a bound.
