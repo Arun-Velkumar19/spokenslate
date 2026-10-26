@@ -14,6 +14,13 @@ Oct 26 – Nov 4, 2026. Solo. Submission deadline Nov 4, 9:00 PM ET = **7:00 PM 
 - [ ] Play bitrun once; confirm keys (shield hold vs tap) and pick a forgiving section.
 - [ ] Camera mount working at ~35–50°.
 
+## Oct 26 checklist
+- [x] Page detection + homography + flattened snapshot (`calibration/page.py`, 16 tests)
+- [ ] Run `scripts/page_preview.py` on the real camera; set rotation in `.env`; save 5 snapshots of hand-drawn layouts
+- [ ] First Muse compile on a saved snapshot (confirm API base URL, model IDs, image input)
+- [ ] Acoustic tap experiment (bare desk vs mousepad; narration/typing false triggers)
+- [ ] bitrun: confirm keys in-game, shield hold vs tap
+
 ## Calendar
 
 | Date | Outcome | Gate |

@@ -6,7 +6,9 @@ running_mode=VIDEO (or LIVE_STREAM) and the hand_landmarker.task model file.
 Verified Oct 25 on mediapipe 1.1.1.
 
 Output per frame: fingertip in camera px + a hand-present flag. Also exposes
-hand_present for edit detection (never compile while a hand is over the page).
+hand_present for edit detection (never compile while a hand is over the page) and for
+PageTracker.update(frame, hand_present=...), which stops a hand covering a page corner
+from being mistaken for the page moving.
 """
 
 from __future__ import annotations

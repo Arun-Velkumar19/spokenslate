@@ -17,6 +17,9 @@ class Settings:
     camera_index: int
     mic_device: str | None
     target: str
+    paper: str = "letter"
+    orientation: str = "landscape"
+    page_rotation: int = 0
 
 
 def load_settings() -> Settings:
@@ -29,4 +32,7 @@ def load_settings() -> Settings:
         camera_index=int(os.getenv("PAPEROS_CAMERA_INDEX", "0")),
         mic_device=os.getenv("PAPEROS_MIC_DEVICE") or None,
         target=os.getenv("PAPEROS_TARGET", "bitrun"),
+        paper=os.getenv("PAPEROS_PAPER", "letter"),
+        orientation=os.getenv("PAPEROS_ORIENTATION", "landscape"),
+        page_rotation=int(os.getenv("PAPEROS_PAGE_ROTATION", "0")),
     )
