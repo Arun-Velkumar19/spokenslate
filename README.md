@@ -4,7 +4,7 @@
 
 PaperOS makes a paper interface *live-programmable*. Draw controls on an ordinary sheet of paper, a Meta model compiles the drawing into a validated control spec, and the paper stays the physical controller. Edit it with a pen mid-session and the behavior updates without restarting the target app.
 
-> Status (Oct 26): implemented and tested: `spec`, `validator`, `runtime/engine`, `adapters/keyboard`, `calibration/page`. `compiler` written but untested against the live API. Stubs: sensing, edits, overlay, main loop.
+> Status (Oct 26): implemented and tested: `spec`, `validator`, `runtime/engine`, `adapters/keyboard`, `calibration/page`, `sensing/hand` (fake results; real camera unverified). `compiler` written but untested against the live API. Stubs: acoustic/press sensing, edits, overlay, main loop.
 
 ## How it works
 
@@ -66,7 +66,8 @@ pytest                 # spec, validator, engine: runs without camera or API
 
 Hand tracking uses the MediaPipe **Tasks** API (`HandLandmarker`); the legacy
 `mp.solutions.hands` API is gone in mediapipe 1.x. Download `hand_landmarker.task`
-from the MediaPipe docs into `models/`.
+from the [MediaPipe models section](https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker#models)
+into `models/` (the file is gitignored).
 
 Set a spending cap/alert in the Meta Model API console. Credits are applied before your card is charged.
 
@@ -80,6 +81,20 @@ Green outline = page locked. The **page** window must show your handwriting upri
 press `r` until it does and copy the printed `PAPEROS_PAGE_ROTATION` into `.env`
 (180 is typical when the camera faces you). `s` saves a frame + flattened page to
 `data/captures/` for testing the compiler.
+
+To overlay the index fingertip, enable hand tracking:
+
+```bash
+python scripts/page_preview.py --hand
+# Optional model location:
+python scripts/page_preview.py --hand --hand-model /path/to/hand_landmarker.task
+```
+
+The camera view shows a cyan fingertip dot, camera pixels, and normalized page coordinates
+via `PageTracker.to_page` (including the selected rotation). The flattened page shows the
+same dot when it is on the page. Off-page fingertips and an unlocked page are labeled.
+Hand presence is passed to the page tracker each frame to protect against corner
+occlusion. Without `--hand`, preview needs no hand model and performs page tracking only.
 
 ## Run (once implemented)
 

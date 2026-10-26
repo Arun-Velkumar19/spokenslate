@@ -47,7 +47,8 @@ invented paper controllers.
 | `spec.py`, `validator.py`, `runtime/engine.py`, `adapters/keyboard.py` | done, tested |
 | `calibration/page.py` + `scripts/page_preview.py` | done, tested on synthetic frames; **not yet verified on a real camera** (PR #1) |
 | `compiler/client.py`, `compiler/prompts.py` | written; **untested against the live Meta API** (base URL, model ids, image format unconfirmed) |
-| `sensing/hand.py`, `sensing/acoustic.py`, `sensing/press.py` | stubs |
+| `sensing/hand.py` + `scripts/page_preview.py --hand` | implemented (Tasks VIDEO, landmark 8, hand presence); fake-result/synthetic preview tests; **not yet verified on a real camera** |
+| `sensing/acoustic.py`, `sensing/press.py` | stubs |
 | `runtime/edits.py`, `overlay.py`, `main.py` loop | stubs |
 
 Schedule, gates and today's checklist: `docs/PLAN.md`. Demo shot list: `docs/DEMO.md`.
@@ -62,7 +63,7 @@ src/paperos/
   runtime/engine.py    deterministic executor (press / slide / load / stop)
   runtime/edits.py     stable-edit detection -> trigger recompile        [stub]
   calibration/page.py  page detect, PageTracker, to_page/to_camera, rectify
-  sensing/hand.py      MediaPipe fingertip + hand_present                 [stub]
+  sensing/hand.py      MediaPipe fingertip + hand_present
   sensing/acoustic.py  mic tap onsets                                     [stub]
   sensing/press.py     fuse fingertip + onsets/dwell -> InputEvents       [stub]
   compiler/            Muse client + prompts (compile, diff recompile)

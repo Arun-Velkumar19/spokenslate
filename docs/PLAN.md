@@ -16,6 +16,8 @@ Oct 26 – Nov 4, 2026. Solo. Submission deadline Nov 4, 9:00 PM ET = **7:00 PM 
 
 ## Oct 26 checklist
 - [x] Page detection + homography + flattened snapshot (`calibration/page.py`, 16 tests)
+- [x] Fingertip camera px + hand presence (`sensing/hand.py`, Tasks VIDEO); fake-result tests and synthetic `page_preview.py --hand` wiring/coordinate tests
+- [ ] Verify `scripts/page_preview.py --hand` on a real camera: fingertip dot + normalized page coords, rotation, hand occlusion over page corners
 - [ ] Run `scripts/page_preview.py` on the real camera; set rotation in `.env`; save 5 snapshots of hand-drawn layouts
 - [ ] First Muse compile on a saved snapshot (confirm API base URL, model IDs, image input)
 - [ ] Acoustic tap experiment (bare desk vs mousepad; narration/typing false triggers)
