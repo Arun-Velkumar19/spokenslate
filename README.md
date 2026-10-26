@@ -4,7 +4,7 @@
 
 PaperOS makes a paper interface *live-programmable*. Draw controls on an ordinary sheet of paper, a Meta model compiles the drawing into a validated control spec, and the paper stays the physical controller. Edit it with a pen mid-session and the behavior updates without restarting the target app.
 
-> Status: scaffold (Oct 25, 2026). Implemented and tested: `spec`, `validator`, `runtime/engine`, `adapters/keyboard`, `compiler` (untested against the live API). Stubs: calibration, sensing, edits, overlay, main loop.
+> Status (Oct 26): implemented and tested: `spec`, `validator`, `runtime/engine`, `adapters/keyboard`, `calibration/page`. `compiler` written but untested against the live API. Stubs: sensing, edits, overlay, main loop.
 
 ## How it works
 
@@ -48,6 +48,7 @@ src/paperos/
   adapters/keyboard.py keyboard emulation + bitrun keymap
   overlay.py           on-screen overlay
   main.py              entry point
+scripts/page_preview.py  live check of paper detection + flattened page
 eval/                  acceptance-gate trial logs
 docs/                  PLAN, DEMO shot list, PRIOR_ART
 ```
@@ -68,6 +69,17 @@ Hand tracking uses the MediaPipe **Tasks** API (`HandLandmarker`); the legacy
 from the MediaPipe docs into `models/`.
 
 Set a spending cap/alert in the Meta Model API console. Credits are applied before your card is charged.
+
+## Day-1 camera check
+
+```bash
+python scripts/page_preview.py
+```
+
+Green outline = page locked. The **page** window must show your handwriting upright;
+press `r` until it does and copy the printed `PAPEROS_PAGE_ROTATION` into `.env`
+(180 is typical when the camera faces you). `s` saves a frame + flattened page to
+`data/captures/` for testing the compiler.
 
 ## Run (once implemented)
 
