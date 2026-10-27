@@ -1,64 +1,55 @@
-from paperos.adapters.keyboard import BITRUN
-from paperos.spec import (
-    Button,
-    Control,
-    ControlSpec,
-    Delay,
-    Hold,
-    Region,
-    Release,
-    Repeat,
-    Sequence,
-    Slider,
-    SliderZone,
-    Tap,
-    Toggle,
-)
-from paperos.validator import validate
+from fixtures import leonard_timeline
+
+from paperos.spec import ReferencePhrase, ResolveOutput
+from paperos.validator import quote_matches, validate_resolution
 
 
-def ctrl(cid, behavior, x0=0.1):
-    return Control(id=cid, label=cid, region=Region(x0=x0, y0=0.1, x1=x0 + 0.15, y1=0.25),
-                   behavior=behavior)
+def phrase(start, end=None, text="this"):
+    return ReferencePhrase(id="r1", text=text, kind="deictic", start=start,
+                           end=end if end is not None else start + 0.3,
+                           word_start=0, word_end=1)
 
 
-def test_valid_demo_layout_passes():
-    spec = ControlSpec(version=0, controls=[
-        ctrl("run", Toggle(on_enable=Hold(action="right"), on_disable=Release(action="right"))),
-        ctrl("jump", Button(on_press=Tap(action="jump")), x0=0.3),
-        ctrl("combo", Button(on_press=Sequence(steps=[
-            Tap(action="jump"), Delay(ms=150), Tap(action="attack")])), x0=0.5),
-        ctrl("dir", Slider(axis="horizontal", zones=[
-            SliderZone(lo=0.0, hi=0.4, action="left"),
-            SliderZone(lo=0.4, hi=0.6, action=None),
-            SliderZone(lo=0.6, hi=1.0, action="right")]), x0=0.7),
-    ])
-    r = validate(spec, BITRUN)
-    assert r.ok, r.errors
+def out(eid, quote="", conf=0.9):
+    return ResolveOutput(element_id=eid, quote=quote, confidence=conf, evidence=["pointing"])
 
 
-def test_unknown_and_unholdable_actions_blocked():
-    spec = ControlSpec(version=0, controls=[
-        ctrl("x", Button(on_press=Tap(action="rm -rf"))),
-        ctrl("y", Toggle(on_enable=Hold(action="jump"), on_disable=Release(action="jump")), x0=0.5),
-    ])
-    r = validate(spec, BITRUN)
-    assert any("unknown action" in e for e in r.errors)
-    assert any("cannot be held" in e for e in r.errors)
+def test_resolves_hidden_ln_x():
+    # "if I cover this" -> the ln x inside (ln x)^(1/3)  (playground test 2E)
+    r = validate_resolution(out("e2", "ln x", 0.85), phrase(59.0), leonard_timeline())
+    assert r.status == "resolved" and r.element_id == "e2"
 
 
-def test_limits_and_overlaps():
-    spec = ControlSpec(version=0, controls=[
-        ctrl("spam", Button(on_press=Repeat(times=50, body=Tap(action="attack")))),
-        ctrl("wait", Button(on_press=Delay(ms=60_000)), x0=0.2),  # overlaps "spam"
-    ])
-    r = validate(spec, BITRUN)
-    assert any("repeat" in e for e in r.errors)
-    assert any("total delay" in e for e in r.errors)
-    assert any("overlap" in e for e in r.errors)
+def test_abstain_is_unresolved():
+    r = validate_resolution(ResolveOutput(element_id=None, confidence=0.0), phrase(59), leonard_timeline())
+    assert r.status == "unresolved" and r.note == "model abstained"
 
 
-def test_overlapping_slider_zones_blocked():
-    spec = ControlSpec(version=0, controls=[ctrl("s", Slider(axis="horizontal", zones=[
-        SliderZone(lo=0.0, hi=0.6, action="left"), SliderZone(lo=0.5, hi=1.0, action="right")]))])
-    assert any("zones overlap" in e for e in validate(spec, BITRUN).errors)
+def test_invented_id_rejected():
+    r = validate_resolution(out("e99"), phrase(59), leonard_timeline())
+    assert r.status == "unresolved" and "unknown element" in r.note
+
+
+def test_not_on_board_yet_or_already_erased():
+    tl = leonard_timeline()
+    assert validate_resolution(out("e3", "x^3 ln 5x"), phrase(20), tl).status == "unresolved"
+    assert validate_resolution(out("e1", "(x^2+1)^3"), phrase(130), tl).status == "unresolved"
+    # written a few seconds after being named ("this problem" while writing it) is fine
+    assert validate_resolution(out("e3", "x^3 ln 5x"), phrase(115), tl).status == "resolved"
+
+
+def test_quote_mismatch_rejected():
+    r = validate_resolution(out("e2", "sin(theta)"), phrase(59), leonard_timeline())
+    assert r.status == "unresolved" and "quote" in r.note
+
+
+def test_low_confidence_becomes_suggestion():
+    r = validate_resolution(out("e2", "ln x", 0.5), phrase(59), leonard_timeline())
+    assert r.status == "unresolved" and r.suggested_element_id == "e2"
+
+
+def test_quote_matching_tolerates_latex_and_spacing():
+    assert quote_matches("(x^2+1)^3", r"\frac{d}{dx}[(x^2+1)^3] = 3(x^2+1)^2")
+    assert quote_matches("ln x", r"(\ln x)^{1/3}")
+    assert quote_matches("", "anything")
+    assert not quote_matches("sin theta", r"(\ln x)^{1/3}")

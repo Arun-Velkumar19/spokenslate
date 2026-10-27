@@ -1,27 +1,30 @@
 # Demo video (≤ 2 min)
 
-Target: [bitrun](https://slashlab.itch.io/bitrun) by Phorb (CC BY-SA 4.0 assets). Credit on screen.
-Play an early, forgiving section. Not "bitrun turbo".
+Pitch line: **"Transcripts tell you what the professor said. Seed tells you what they meant."**
 
-Pitch line: **a paper interface you can reprogram with a pen while you're using it.**
+Footage: your own whiteboard recording (rights-clean) as the main clip, plus one openly
+licensed lecture (MIT OCW, credit on screen) to show it works on real teaching.
 
 ## Shot list
 
-1. **Invent (0:00–0:20)** — Blank page. Draw, with no explanation on screen:
-   `RUN →` (toggle), `JUMP`, `ATTACK`, and a compound: `JUMP → ATTACK x2`.
-2. **Compile (0:20–0:35)** — Overlay outlines each control with its one-line rationale
-   ("arrow read as 'then'", "x2 read as repeat twice"). Show compile time.
-3. **Play (0:35–1:00)** — Tap RUN, character walks. JUMP over a hazard. Compound fires.
-4. **Edit live — the key beat, one continuous take (1:00–1:25)** — Game keeps running.
-   Cross out ATTACK, draw SHIELD. Overlay: "edit detected → compiling → ready in N s".
-   RUN stays active the whole time. Tap SHIELD as an enemy approaches → shield up.
-5. **Second person (1:25–1:40)** — Someone else draws their own layout, it works.
-6. **Evidence (1:40–1:55)** — On screen: press reliability (x/30), compile gate (x/10),
-   edit-to-ready latency. One line crediting prior art (see PRIOR_ART.md).
-7. **Close (1:55–2:00)** — "Draw it. Compile it. Control it."
+1. **The problem (0:00–0:15).** Black screen. VoiceOver reads a plain transcript:
+   *"…so this term cancels with that one, and we're left with this."* On screen: "Which term?"
+   Then the video fades in: the professor pointing. "If you can't see the board, this is your lecture."
+2. **Seed (0:15–0:45). One continuous take.** The Seed page, VoiceOver navigating by
+   heading: "Step 3, 2:31…", then the speech: *"this term, means ln x, in step 2."*
+   Show an erased step: "erased at 4:02, kept here."
+3. **How (0:45–1:15).** Split screen: SAM 3.1 masking the lecturer → Muse Spark reading
+   the board into steps → Voice Transcribe words → one reference resolved with its evidence
+   ("hand covers (ln x)", confidence 0.85). Name each Meta model on screen.
+4. **Honesty beat (1:15–1:30).** A genuinely ambiguous moment → "unresolved". Line:
+   "When it isn't sure, it says so. A wrong answer is worse than none."
+5. **Proof (1:30–1:45).** Benchmark table: plain transcript resolves 0/N references;
+   Seed X/N correct, 0 confident-wrong, K abstained. Two lecturers.
+6. **Try it + close (1:45–2:00).** Hosted link with 2–3 lectures. Credits (lecture license,
+   prior-art line). "Seed: the board, for everyone in the room."
 
 ## Recording rules
-- Lock camera exposure/focus. Even lighting, no harsh hand shadows.
-- Record voiceover separately (narration triggers acoustic taps).
-- Shot 4 has no cuts. Do several takes; use a real one.
-- If running the dwell fallback, say so on screen. Never claim touch sensing you aren't using.
+- Record VoiceOver audio from the actual page (no fake narration of what a screen reader says).
+- Voiceover narration recorded separately and kept short.
+- Every number on screen comes from `eval/results/`.
+- Never show a result the system didn't actually produce.
