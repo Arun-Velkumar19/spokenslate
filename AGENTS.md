@@ -61,7 +61,8 @@ fingertip track (hand.py) ──► pointing candidates ──┐          │  
 |---|---|
 | `spec.py`, `timeline.py`, `references.py`, `pointing.py`, `validator.py`, `render.py` | done, tested |
 | `pipeline.py`, `video.py`, `main.py` CLI | done, tested with fake models + a real mp4 |
-| `models/muse.py`, `models/prompts.py` | written; **not yet run against the live API** |
+| `models/muse.py`, `models/prompts.py` | board read verified live Oct 28 (chat.completions, JPEG `image_url` data URL, `muse-spark-1.3` at `https://api.meta.ai/v1` → valid `BoardDiff`, 9.2s); `scripts/smoke_api.py IMAGE` packages that one call (logs the request minus key/bytes, raw reply, latency, parse); `resolve` **not yet run against the live API** |
+| `scoring.py` + `scripts/score.py` | scores a LectureDoc against `eval/references.csv` (time window + phrase text; truth = element id or written referent) → correct / unresolved / wrong / confident-wrong, plus a plain-transcript baseline; tested on synthetic data; **not yet run on a real pipeline output** (CSV still empty) |
 | `models/transcribe.py` | `load_words` works; Muse transcription **unverified** (word timestamps?) |
 | `models/segment.py` | `NullSegmenter` only; SAM 3.1 API shape **unverified** |
 | `sensing/hand.py` + `scripts/page_preview.py --hand` + `scripts/fingertips.py` | MediaPipe Tasks fingertip (landmark 8) + hand presence; `scripts/fingertips.py VIDEO --out fingertips.json [--fps 10]` writes the frame-normalized `[[t, u, v], ...]` track for `process --fingertips` (reads frames sequentially via `video.iter_frames`); tested with a fake detector + synthetic mp4 through the process CLI and pointing; **not yet run on a real lecture clip or camera** |
@@ -79,6 +80,7 @@ src/paperos/
   references.py    find "this term" / "the first" / "the problem I just gave you" (high recall)
   pointing.py      fingertip samples -> ranked candidate elements
   validator.py     ResolveOutput -> Resolution; the hallucination guard
+  scoring.py       LectureDoc vs eval/references.csv: correct / unresolved / wrong / conf-wrong
   render.py        accessible HTML (headings per step, links, unresolved marked, escaped)
   pipeline.py      orchestration behind Protocols (BoardReader, Resolver, Segmenter)
   video.py         VideoFile, iter_frames, extract_audio (ffmpeg), keyframe selection, jpeg

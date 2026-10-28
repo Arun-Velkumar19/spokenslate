@@ -43,6 +43,9 @@ rather than auto-resolution. Fallback, never pivot.
 - [x] Offline fingertip exporter → frame-normalized `--fingertips` JSON; sequential video
       decoding and pointing handoff tested with a fake detector + synthetic mp4.
 - [ ] Validate MediaPipe tracking on a real lecture; candidates help on ≥1 case.
+- [x] `scripts/smoke_api.py`: one logged `read_board` call (format verified Oct 28, valid
+      `BoardDiff` in 9.2s); `scripts/score.py` + `scoring.py`: benchmark scorer with baseline row.
+- [ ] Fill `eval/references.csv` (≥15 refs, 2 lecturers) and score a real `process` output.
 - SAILS email sent Oct 27. Nudge Thu Oct 29; walk in (Wilson Hall) if silent.
 - Backup: Dr. Troy McDaniel (CUbiC), Arizona Association of Blind Students, AppleVis forum
   (once there's a page to show). Lock whatever evidence exists by Sat Oct 31.
