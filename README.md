@@ -56,7 +56,7 @@ python -m paperos process lecture.mp4 --words words.json --fingertips fingertips
 
 The exporter defaults to 10 samples/second and decodes frames sequentially. It writes
 `[[t, u, v], ...]`: clip-relative seconds, `x / frame_width`, and `y / frame_height`.
-Sampling uses the first frame at or after each interval, retaining that frame's actual
+Sampling uses the nearest source frame at each interval, retaining that frame's actual
 time; rates above the source FPS use each frame once. Missing/invalid fingertips are
 omitted. Lecture coordinates use the full frame with no page rectification.
 Use `--hand-model PATH` for a model stored elsewhere.

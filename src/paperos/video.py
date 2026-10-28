@@ -45,32 +45,36 @@ class VideoFile:
         return frame
 
 
-def iter_frames(path: Path, fps: float = 10.0) -> Iterator[tuple[float, np.ndarray]]:
-    """Decode sequentially, sampling the first frame at/after each 1/fps interval.
+def iter_frames(path: Path, fps: float | None = None) -> Iterator[tuple[float, np.ndarray]]:
+    """Yield (t, frame) reading the file once, front to back (no per-frame seeks).
 
-    Times are actual frame indices / source FPS, in seconds from the clip start.
-    Never duplicate frames when the requested rate exceeds the source rate. Close
-    the iterator if stopping early so its capture is released immediately.
+    t is frame_index / native fps. With ``fps``, choose the nearest source frame
+    per interval; skipped frames are grabbed but not decoded into arrays. Rates
+    above native FPS yield each frame once. Close the iterator when stopping early.
     """
-    if not math.isfinite(fps) or fps <= 0:
+    if fps is not None and (not math.isfinite(fps) or fps <= 0):
         raise ValueError("fps must be finite and greater than zero")
     cap = cv2.VideoCapture(str(path))
+    step = 1.0 / fps if fps else 0.0
+    next_t = 0.0
+    idx = 0
     try:
         if not cap.isOpened():
             raise FileNotFoundError(f"cannot open video {path}")
-        source_fps = cap.get(cv2.CAP_PROP_FPS)
-        if not math.isfinite(source_fps) or source_fps <= 0:
+        native = cap.get(cv2.CAP_PROP_FPS)
+        if not math.isfinite(native) or native <= 0:
             raise ValueError(f"invalid source FPS for video {path}")
-        frame_index, sample_index = 0, 0
-        while True:
-            ok, frame = cap.read()
+        while cap.grab():
+            t = idx / native
+            idx += 1
+            # Half a source frame of slack so 30 fps -> 10 fps keeps exactly every 3rd frame.
+            if t + 0.5 / native < next_t:
+                continue
+            ok, frame = cap.retrieve()
             if not ok:
                 break
-            t = frame_index / source_fps
-            if t + 1e-9 >= sample_index / fps:
-                yield t, frame
-                sample_index += 1
-            frame_index += 1
+            next_t += step
+            yield t, frame
     finally:
         cap.release()
 

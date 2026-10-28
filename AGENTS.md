@@ -64,7 +64,7 @@ fingertip track (hand.py) ──► pointing candidates ──┐          │  
 | `models/muse.py`, `models/prompts.py` | written; **not yet run against the live API** |
 | `models/transcribe.py` | `load_words` works; Muse transcription **unverified** (word timestamps?) |
 | `models/segment.py` | `NullSegmenter` only; SAM 3.1 API shape **unverified** |
-| `sensing/hand.py` + `scripts/page_preview.py --hand` + `scripts/fingertips.py` | MediaPipe Tasks fingertip (landmark 8) + hand presence; lecture exporter reads sequentially and writes frame-normalized `--fingertips` JSON; tested with a fake detector + synthetic mp4 through pointing; **real camera/lecture tracking unverified** |
+| `sensing/hand.py` + `scripts/page_preview.py --hand` + `scripts/fingertips.py` | MediaPipe Tasks fingertip (landmark 8) + hand presence; `scripts/fingertips.py VIDEO --out fingertips.json [--fps 10]` writes the frame-normalized `[[t, u, v], ...]` track for `process --fingertips` (reads frames sequentially via `video.iter_frames`); tested with a fake detector + synthetic mp4 through the process CLI and pointing; **not yet run on a real lecture clip or camera** |
 | `calibration/page.py` | from PaperOS; page detection for camera setups (lecture video uses frame coords, see gotchas) |
 
 Plan, gates, calendar: `docs/PLAN.md`. Demo: `docs/DEMO.md`. Prior art: `docs/PRIOR_ART.md`.
@@ -81,7 +81,7 @@ src/paperos/
   validator.py     ResolveOutput -> Resolution; the hallucination guard
   render.py        accessible HTML (headings per step, links, unresolved marked, escaped)
   pipeline.py      orchestration behind Protocols (BoardReader, Resolver, Segmenter)
-  video.py         VideoFile, extract_audio (ffmpeg), keyframe selection, jpeg
+  video.py         VideoFile, iter_frames, extract_audio (ffmpeg), keyframe selection, jpeg
   models/          muse.py (board + resolve), prompts.py, transcribe.py, segment.py
   calibration/     page/board detection (PaperOS); sensing/hand.py fingertip tracking
   main.py          CLI: process / render
