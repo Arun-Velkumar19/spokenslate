@@ -64,7 +64,7 @@ fingertip track (hand.py) ──► pointing candidates ──┐          │  
 | `models/muse.py`, `models/prompts.py` | written; **not yet run against the live API** |
 | `models/transcribe.py` | `load_words` works; Muse transcription **unverified** (word timestamps?) |
 | `models/segment.py` | `NullSegmenter` only; SAM 3.1 API shape **unverified** |
-| `sensing/hand.py` + `scripts/page_preview.py --hand` | MediaPipe Tasks fingertip (landmark 8) + hand presence; tested with a fake detector; **not verified on a real camera**; not yet wired into the pipeline (next: extract a fingertip track from lecture video → `--fingertips` JSON) |
+| `sensing/hand.py` + `scripts/page_preview.py --hand` + `scripts/fingertips.py` | MediaPipe Tasks fingertip (landmark 8) + hand presence; lecture exporter reads sequentially and writes frame-normalized `--fingertips` JSON; tested with a fake detector + synthetic mp4 through pointing; **real camera/lecture tracking unverified** |
 | `calibration/page.py` | from PaperOS; page detection for camera setups (lecture video uses frame coords, see gotchas) |
 
 Plan, gates, calendar: `docs/PLAN.md`. Demo: `docs/DEMO.md`. Prior art: `docs/PRIOR_ART.md`.

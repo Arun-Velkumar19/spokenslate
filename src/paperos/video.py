@@ -7,8 +7,10 @@ doesn't trigger a board read. A minimum gap bounds the number of paid model call
 
 from __future__ import annotations
 
+import math
 import shutil
 import subprocess
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Protocol
 
@@ -41,6 +43,36 @@ class VideoFile:
         if not ok:
             raise ValueError(f"no frame at t={t:.2f}s")
         return frame
+
+
+def iter_frames(path: Path, fps: float = 10.0) -> Iterator[tuple[float, np.ndarray]]:
+    """Decode sequentially, sampling the first frame at/after each 1/fps interval.
+
+    Times are actual frame indices / source FPS, in seconds from the clip start.
+    Never duplicate frames when the requested rate exceeds the source rate. Close
+    the iterator if stopping early so its capture is released immediately.
+    """
+    if not math.isfinite(fps) or fps <= 0:
+        raise ValueError("fps must be finite and greater than zero")
+    cap = cv2.VideoCapture(str(path))
+    try:
+        if not cap.isOpened():
+            raise FileNotFoundError(f"cannot open video {path}")
+        source_fps = cap.get(cv2.CAP_PROP_FPS)
+        if not math.isfinite(source_fps) or source_fps <= 0:
+            raise ValueError(f"invalid source FPS for video {path}")
+        frame_index, sample_index = 0, 0
+        while True:
+            ok, frame = cap.read()
+            if not ok:
+                break
+            t = frame_index / source_fps
+            if t + 1e-9 >= sample_index / fps:
+                yield t, frame
+                sample_index += 1
+            frame_index += 1
+    finally:
+        cap.release()
 
 
 def extract_audio(video: Path, out_wav: Path) -> Path:

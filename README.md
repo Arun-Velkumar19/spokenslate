@@ -45,7 +45,23 @@ including evidence for each resolved reference).
 Fingertip tracking (MediaPipe Tasks) gives the resolver ranked candidates for what the
 lecturer is pointing at. Download `hand_landmarker.task` from the
 [MediaPipe models page](https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker#models)
-into `models/` (gitignored). Live check with a webcam:
+into `models/` (gitignored). Extract a track from a recorded lecture, then pass it to
+the processor:
+
+```bash
+python scripts/fingertips.py lecture.mp4 --out fingertips.json --fps 10
+python -m paperos process lecture.mp4 --words words.json --fingertips fingertips.json \
+  --out site/ --title "Calculus 2, 6.1" --source "credit line"
+```
+
+The exporter defaults to 10 samples/second and decodes frames sequentially. It writes
+`[[t, u, v], ...]`: clip-relative seconds, `x / frame_width`, and `y / frame_height`.
+Sampling uses the first frame at or after each interval, retaining that frame's actual
+time; rates above the source FPS use each frame once. Missing/invalid fingertips are
+omitted. Lecture coordinates use the full frame with no page rectification.
+Use `--hand-model PATH` for a model stored elsewhere.
+
+The existing camera/page preview is also available:
 
 ```bash
 python scripts/page_preview.py --hand

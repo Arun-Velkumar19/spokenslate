@@ -40,6 +40,9 @@ If the Oct 29 gate fails: ship with "possibly" suggestions and candidates highli
 rather than auto-resolution. Fallback, never pivot.
 
 ## Validation track (parallel, not blocking)
+- [x] Offline fingertip exporter → frame-normalized `--fingertips` JSON; sequential video
+      decoding and pointing handoff tested with a fake detector + synthetic mp4.
+- [ ] Validate MediaPipe tracking on a real lecture; candidates help on ≥1 case.
 - SAILS email sent Oct 27. Nudge Thu Oct 29; walk in (Wilson Hall) if silent.
 - Backup: Dr. Troy McDaniel (CUbiC), Arizona Association of Blind Students, AppleVis forum
   (once there's a page to show). Lock whatever evidence exists by Sat Oct 31.
