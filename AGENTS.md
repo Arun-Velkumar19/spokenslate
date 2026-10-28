@@ -1,78 +1,93 @@
-# PaperOS: agent handoff
+# Seed: agent handoff
 
 Read this before touching code. It applies to every coding agent (Codex, Claude Code, etc.).
 Owner: Roon (solo). Meta Global AI Developer Hackathon, Indie track.
-**Submission deadline: Nov 4, 2026, 7:00 PM Arizona (9:00 PM ET).**
+**Submission deadline: Nov 4, 2026, 7:00 PM Arizona (9:00 PM ET).** Target: submitted by early afternoon.
+
+"Seed" is a working name; the Python package is still `paperos` (the project pivoted from
+PaperOS on Oct 27). A rename is one PR once the name is picked. Don't rename on your own.
 
 ## What this is
 
-A paper game controller you can reprogram with a pen while using it.
-1. Draw controls on paper ("JUMP", "RUN →", "JUMP → ATTACK x2").
-2. A camera sees the page; Meta's Muse model reads the drawing once and compiles it into a
-   typed, validated `ControlSpec`.
-3. The camera tracks the fingertip; tapping a drawn control sends a key press to the game
-   (bitrun, an open-source browser platformer).
-4. Cross out ATTACK and draw SHIELD mid-game: Muse recompiles **only the diff**, the game
-   keeps running, untouched controls (e.g. an active RUN toggle) keep working.
+A board-aware lecture transcript. A whiteboard lecture is two streams: what's **said** and
+what's **written**. Transcripts keep only the first. Seed takes a recorded lecture clip and
+produces an accessible web page where:
+1. each line written on the board appears, as math, at the moment it was written
+2. spoken references ("this term cancels", "the first", "the problem I just gave you")
+   link to the exact thing on the board, or say "unresolved" when unsure
+3. erased steps are kept
 
-The paper is passive; the camera is the sensor. Novelty = the combination of (a) the
-drawing stays the live control surface, (b) pen edits change behavior mid-session,
-(c) the model interprets improvised notation. See `docs/PRIOR_ART.md`: never claim we
-invented paper controllers.
+Primary user: blind and low-vision students (the board is a dead end for them). Operator:
+a university accessibility office, or anyone with the recording. The student only reads
+the output page with a screen reader.
+
+Evidence it works (Oct 27, playground): `muse-spark-1.3` resolved 10/10 references on
+Professor Leonard's Calc 2 lecture, incl. one hidden under his hand. See `eval/results/`.
+
+## Pipeline
+
+```
+video ──► thumbnails ──► keyframes (board changed) ──► SAM 3.1 masks lecturer ──► Muse: BoardDiff
+                                                                                       │
+audio ──► Voice Transcribe ──► words w/ timestamps ──► reference phrases       Timeline (ids, times,
+                                       │                                         erased kept)
+fingertip track (hand.py) ──► pointing candidates ──┐          │                      │
+                                                    ▼          ▼                      ▼
+                                   Muse: ResolveOutput (3 frames + words per frame + board elements)
+                                                    │
+                                     validator (fails toward "unresolved")  ──► LectureDoc ──► HTML
+```
 
 ## Invariants (do not break)
 
-- **The model never runs per frame.** It compiles once and recompiles on stable edits.
-- **The model never emits code.** Only `ControlSpec` / `SpecDiff` JSON (see `spec.py`).
-  Everything executable is deterministic code in this repo.
-- **Validator gates everything.** No spec reaches the engine without
-  `validator.validate(spec, keymap).ok`. The model only names semantic actions
-  ("jump"); `adapters/keyboard.py` owns the key mapping. Never let a model output pick a key.
-- **Freeze primitives, not notation.** Primitives (tap/hold/release/delay/sequence/repeat;
-  button/toggle/slider) are fixed after Oct 28. Do NOT add a fixed drawing grammar
-  (e.g. "arrows must be drawn like X"). Notation stays open; the model maps it.
-- **Recompile = diff.** Control ids are stable across recompiles; removed ids are never
-  reused. `apply_diff` + `Engine.load` must keep state for unchanged controls.
-- **Safety on transitions.** Recompile, page lost, pause, shutdown → release held keys for
-  affected controls (`Engine.load` / `Engine.stop` / `release_all`).
-- **Fallback, never pivot.** If touch sensing fails the Oct 29 gate, switch to the
-  documented fallback (acoustic-fused → vision-only → dwell, labeled honestly).
-- **No scope creep:** no browser automation, no generated-code execution, no extra app
-  integrations, no projector, no hardware. Ask Roon before adding any dependency.
+- **A confident wrong answer is the worst outcome.** Every check fails toward
+  "unresolved". Never loosen the validator to raise the resolved count.
+- **The model never sets times or permanent ids, and never emits code.** It returns
+  `BoardDiff` / `ResolveOutput` JSON. The pipeline assigns ids (`e1, e2, ...`) and times.
+- **Validator gates every resolution** (`validator.validate_resolution`): unknown id,
+  element not on the board then, quote mismatch, low confidence → unresolved.
+- **Erased content is kept** (`TimedElement.erased_at`), never deleted. Ids never reused.
+- **Offline only.** Recorded clips in, static pages out. No live classroom mode.
+- **Bounded spend.** No per-frame model calls; keyframes have a min gap; ≤2 attempts per
+  call; escalation to Wonder at most once per phrase. Log calls.
+- **Footage rights.** Only commit your own recordings or openly licensed lectures (e.g.
+  MIT OCW, CC BY-NC-SA, with credit). Never commit YouTube downloads. `data/` is gitignored.
+- **No scope creep:** no slides, no live mode, no dictation/two-way, no translation, no
+  hosted upload backend (stretch only, after Nov 1). Ask Roon before adding a dependency.
 
 ## Status (keep this section current)
 
 | Module | State |
 |---|---|
-| `spec.py`, `validator.py`, `runtime/engine.py`, `adapters/keyboard.py` | done, tested |
-| `calibration/page.py` + `scripts/page_preview.py` | done, tested on synthetic frames; **not yet verified on a real camera** (PR #1) |
-| `compiler/client.py`, `compiler/prompts.py` | written; **untested against the live Meta API** (base URL, model ids, image format unconfirmed) |
-| `sensing/hand.py` + `scripts/page_preview.py --hand` | implemented (Tasks VIDEO, landmark 8, hand presence); fake-result/synthetic preview tests; **not yet verified on a real camera** |
-| `sensing/acoustic.py`, `sensing/press.py` | stubs |
-| `runtime/edits.py`, `overlay.py`, `main.py` loop | stubs |
+| `spec.py`, `timeline.py`, `references.py`, `pointing.py`, `validator.py`, `render.py` | done, tested |
+| `pipeline.py`, `video.py`, `main.py` CLI | done, tested with fake models + a real mp4 |
+| `models/muse.py`, `models/prompts.py` | written; **not yet run against the live API** |
+| `models/transcribe.py` | `load_words` works; Muse transcription **unverified** (word timestamps?) |
+| `models/segment.py` | `NullSegmenter` only; SAM 3.1 API shape **unverified** |
+| `sensing/hand.py` + `scripts/page_preview.py --hand` | MediaPipe Tasks fingertip (landmark 8) + hand presence; tested with a fake detector; **not verified on a real camera**; not yet wired into the pipeline (next: extract a fingertip track from lecture video → `--fingertips` JSON) |
+| `calibration/page.py` | from PaperOS; page detection for camera setups (lecture video uses frame coords, see gotchas) |
 
-Schedule, gates and today's checklist: `docs/PLAN.md`. Demo shot list: `docs/DEMO.md`.
+Plan, gates, calendar: `docs/PLAN.md`. Demo: `docs/DEMO.md`. Prior art: `docs/PRIOR_ART.md`.
 
 ## Layout
 
 ```
 src/paperos/
-  spec.py              ControlSpec / SpecDiff contract + apply_diff
-  validator.py         spec vs keymap whitelist, limits, overlaps
-  adapters/keyboard.py semantic action -> key (bitrun keymap), dry_run mode
-  runtime/engine.py    deterministic executor (press / slide / load / stop)
-  runtime/edits.py     stable-edit detection -> trigger recompile        [stub]
-  calibration/page.py  page detect, PageTracker, to_page/to_camera, rectify
-  sensing/hand.py      MediaPipe fingertip + hand_present
-  sensing/acoustic.py  mic tap onsets                                     [stub]
-  sensing/press.py     fuse fingertip + onsets/dwell -> InputEvents       [stub]
-  compiler/            Muse client + prompts (compile, diff recompile)
-  overlay.py           on-screen overlay (regions, rationale, status)     [stub]
-  main.py              wiring
-scripts/               dev tools (page_preview.py)
-tests/                 pytest, all runnable without camera/mic/API
-eval/                  CSV logs for acceptance gates (commit results)
-docs/                  PLAN, DEMO, PRIOR_ART
+  spec.py          Word, BoardElement/Diff, TimedElement, ReferencePhrase, ResolveOutput,
+                   Resolution, LectureDoc
+  timeline.py      apply BoardDiffs atomically; alive_at / alive_during; erased kept
+  references.py    find "this term" / "the first" / "the problem I just gave you" (high recall)
+  pointing.py      fingertip samples -> ranked candidate elements
+  validator.py     ResolveOutput -> Resolution; the hallucination guard
+  render.py        accessible HTML (headings per step, links, unresolved marked, escaped)
+  pipeline.py      orchestration behind Protocols (BoardReader, Resolver, Segmenter)
+  video.py         VideoFile, extract_audio (ffmpeg), keyframe selection, jpeg
+  models/          muse.py (board + resolve), prompts.py, transcribe.py, segment.py
+  calibration/     page/board detection (PaperOS); sensing/hand.py fingertip tracking
+  main.py          CLI: process / render
+tests/             pytest, no API/camera needed (fixtures.py = Leonard test data)
+eval/              reference benchmark CSVs + results
+docs/              PLAN, DEMO, PRIOR_ART
 ```
 
 ## Commands
@@ -80,48 +95,50 @@ docs/                  PLAN, DEMO, PRIOR_ART
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-pytest -q                      # must pass before every commit
-ruff check src tests scripts   # must be clean
-python scripts/page_preview.py # needs a webcam
+pytest -q && ruff check src tests scripts          # both must pass before every commit
+python -m paperos process clip.mp4 --words words.json --out site/ --title "..." --source "credit"
+python -m paperos render site/clip.json --out site/clip.html
 ```
+`ffmpeg` must be installed for audio extraction (`brew install ffmpeg`).
 
 ## Conventions
 
-- **Branch per task, PR into `main`.** Never push to `main` directly. Branch names:
-  `<agent>/<short-task>` (e.g. `codex/hand-tracker`, `claude/acoustic`).
-- **One agent per module at a time.** Several agents may run in parallel. Before starting,
-  check open PRs (`gh pr list`) and don't edit files another open PR touches. Shared
-  contracts (`spec.py`, `validator.py`, `engine.py` public API) change only in their own
-  small PR.
-- **Tests with every change.** Hardware-dependent code gets a pure-function core tested
-  on synthetic data (see `tests/test_page.py` for the pattern: generated frames, no camera).
-  Inject time/sleep/IO so tests are instant.
-- Python 3.11+, type hints, ruff line length 100. Keep modules small; no frameworks.
-- Update the **Status** table above and the checklist in `docs/PLAN.md` in the same PR.
-- Log real-world trials to `eval/*.csv` (columns already defined). Log failures too.
-- Never commit `.env`, API keys, or raw captures (`data/captures/` is gitignored).
+- **Branch per task, PR into `main`.** Never push to `main`. Branch `<agent>/<task>`.
+- **One agent per module.** Check `gh pr list` first; don't edit files another open PR
+  touches. Contract changes (`spec.py`, `validator.py`, Protocols in `pipeline.py`) go in
+  their own small PR.
+- **Tests with every change**, runnable without API/camera. Model calls go through the
+  Protocols so tests use fakes (see `tests/test_pipeline.py`).
+- **Prompt changes** (`models/prompts.py`) must be re-scored on the reference benchmark
+  (`eval/references.csv`) in the same PR, with the before/after numbers in the PR text.
+- Python 3.11+, type hints, ruff line length 100. Small modules, no frameworks.
+- Update the Status table and `docs/PLAN.md` checklist in the same PR.
+- Never commit `.env`, keys, raw video/audio, or downloaded lectures.
 
 ## Gotchas already found (don't rediscover them)
 
-- **MediaPipe 1.x removed `mp.solutions.hands`.** Use the Tasks API:
-  `mediapipe.tasks.python.vision.HandLandmarker` (VIDEO/LIVE_STREAM mode) with
-  `models/hand_landmarker.task` (gitignored; download from MediaPipe docs). Index fingertip = landmark 8.
-- **Pass `hand_present` into `PageTracker.update()`.** A hand over a page corner makes the
-  detector return a wrong outline; without the flag the tracker would relock to it after ~1 s.
-- Page gating uses **max** corner distance, not mean (one occluded corner hides in a mean).
-- Warm light: detection white-balances first. Skin stays saturated, so hands are excluded.
-- A webcam facing the user sees the page upside-down: `PAPEROS_PAGE_ROTATION=180`.
-- Expect ~100–150 ms tap-to-keypress latency. The demo uses a forgiving bitrun section.
-- The game window must have focus for emulated keys to land.
-- bitrun movement keys are **held** keys: map RUN to a **toggle** (hold on / release off) or a
-  direction slider. Never require a physical press-and-hold on paper.
-- Narration triggers acoustic taps: voiceover is recorded separately; every acoustic onset
-  must be fused with a fingertip-in-region check.
-- Meta Model API: OpenAI-SDK compatible per reports; **verify** base URL, model ids
-  (`muse-spark-1.1`, `muse-wonder-1.0`), image input, and structured-output support before
-  building on them. Set a spending cap; never put retry loops around paid calls without a bound.
+- **Word timestamps are essential.** A point lines up with the words being said at that
+  instant, not the whole sentence ("the problem I just gave you" vs "this problem" in one
+  caption line meant opposite things). Captions-per-frame aren't enough.
+- **Offline is an advantage:** later frames can resolve earlier references (the model used
+  frame 3 to resolve frame 1). Keep the lookahead.
+- **Hidden ≠ erased.** The lecturer's body covers the board constantly. The board prompt
+  says so; the timeline only erases on explicit model `erased`.
+- **Real video files:** the last frame is at `duration - 1/fps`; `VideoFile.frame_at` clamps.
+- **Lecture video ≠ paper page:** the board usually fills/exceeds the frame, and
+  `calibration.page.detect_quad` rejects quads touching the frame edge. For lecture clips
+  use frame-normalized coords as board coords (fixed camera). Rectification is optional.
+- **Playground:** "referenced response not found or expired" = stale chat; click New chat.
+  Crop screenshots to the video (full-browser screenshots shrink the handwriting).
+- **Avoid `-contributor` model variants** until we know what they do with data. Free
+  credits: Meta notes content may be used for product improvement.
+- **MediaPipe 1.x removed `mp.solutions.hands`.** Use Tasks API `HandLandmarker`. The model
+  file `models/hand_landmarker.task` is gitignored; download it from the
+  [MediaPipe hand landmarker models](https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker#models).
+- Meta Model API base URL `https://api.meta.ai/v1` (per LiteLLM docs). Confirm with the
+  playground's "Get code", incl. image message format and JSON mode.
 
 ## When unsure
 
-Prefer the smallest change that keeps the invariants. If a task would change a primitive,
-the validator's rules, the demo scope, or add a dependency, stop and ask Roon.
+Prefer the smallest change that keeps the invariants. If a task would change the contracts,
+loosen the validator, widen scope, or add a dependency, stop and ask Roon.

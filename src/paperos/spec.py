@@ -1,79 +1,48 @@
-"""ControlSpec: the contract between the compiler (Muse) and everything deterministic.
+"""Seed data contracts.
 
-Freeze primitives, not notation. People draw whatever notation they like (arrows,
-"then", numbered steps, "x2"); the model's only job is to map it onto these types.
-The model never emits code. Anything it emits must parse as a ControlSpec or SpecDiff,
-then pass the validator against the active adapter's action whitelist.
+A lecture is two streams: what was SAID (timestamped words) and what was WRITTEN (board
+elements that appear, change, and get erased). Seed joins them, and resolves spoken
+references ("this term", "the first", "over here") to specific board elements.
 
-Coordinates are normalized to the rectified page: (0, 0) top-left, (1, 1) bottom-right.
+Rules the contracts enforce:
+- The model never sets times. It reports what is on the board (BoardDiff) and what a
+  phrase refers to (ResolveOutput). The pipeline stamps times and the validator decides.
+- Element ids are stable for the whole lecture and never reused, even after erasing.
+- Erased elements are kept (with erased_at), never deleted.
+
+Coordinates are normalized to the board image: (0, 0) top-left, (1, 1) bottom-right.
 """
 
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-
-# --------------------------------------------------------------------------- actions
 
 
 class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class Tap(_Strict):
-    """Press and release an adapter action once (e.g. jump)."""
-
-    op: Literal["tap"] = "tap"
-    action: str
+# --------------------------------------------------------------------------- speech
 
 
-class Hold(_Strict):
-    """Start holding an adapter action until a matching Release (e.g. run right)."""
+class Word(_Strict):
+    text: str
+    start: float = Field(ge=0)
+    end: float = Field(ge=0)
 
-    op: Literal["hold"] = "hold"
-    action: str
-
-
-class Release(_Strict):
-    op: Literal["release"] = "release"
-    action: str
-
-
-class Delay(_Strict):
-    op: Literal["delay"] = "delay"
-    ms: int = Field(ge=0)
+    @model_validator(mode="after")
+    def _ordered(self) -> Word:
+        if self.end < self.start:
+            raise ValueError("word end before start")
+        return self
 
 
-class Sequence(_Strict):
-    """Run steps in order. This is how drawn arrows / 'then' compile."""
-
-    op: Literal["sequence"] = "sequence"
-    steps: list[Action] = Field(min_length=1)
-
-
-class Repeat(_Strict):
-    """Run `body` n times. This is how 'x2' compiles."""
-
-    op: Literal["repeat"] = "repeat"
-    times: int = Field(ge=1)
-    body: Action
-
-
-Action = Annotated[
-    Tap | Hold | Release | Delay | Sequence | Repeat,
-    Field(discriminator="op"),
-]
-
-Sequence.model_rebuild()
-Repeat.model_rebuild()
-
-# --------------------------------------------------------------------------- controls
+# --------------------------------------------------------------------------- board
 
 
 class Region(_Strict):
-    """Axis-aligned box on the rectified page, normalized 0..1."""
-
     x0: float = Field(ge=0, le=1)
     y0: float = Field(ge=0, le=1)
     x1: float = Field(ge=0, le=1)
@@ -88,115 +57,101 @@ class Region(_Strict):
     def contains(self, x: float, y: float) -> bool:
         return self.x0 <= x <= self.x1 and self.y0 <= y <= self.y1
 
-    def overlaps(self, other: Region) -> bool:
-        return not (
-            self.x1 <= other.x0 or other.x1 <= self.x0 or self.y1 <= other.y0 or other.y1 <= self.y0
-        )
+    def distance(self, x: float, y: float) -> float:
+        """0 inside the box, else Euclidean distance to its edge."""
+        dx = max(self.x0 - x, 0.0, x - self.x1)
+        dy = max(self.y0 - y, 0.0, y - self.y1)
+        return (dx * dx + dy * dy) ** 0.5
 
 
-class Button(_Strict):
-    kind: Literal["button"] = "button"
-    on_press: Action
+ElementKind = Literal["math", "text", "diagram", "annotation"]
 
 
-class Toggle(_Strict):
-    """Tap once for on, tap again for off. Primary way to express held keys (RUN →)."""
+class BoardElement(_Strict):
+    """One thing on the board, as the model reads it. Usually one written line."""
 
-    kind: Literal["toggle"] = "toggle"
-    on_enable: Action
-    on_disable: Action
-
-
-class SliderZone(_Strict):
-    """While the slider value is in [lo, hi), `action` is held. action=None means idle."""
-
-    lo: float = Field(ge=0, le=1)
-    hi: float = Field(ge=0, le=1)
-    action: str | None = None
-
-
-class Slider(_Strict):
-    """Fingertip position along the drawn line → value 0..1 → held action for its zone."""
-
-    kind: Literal["slider"] = "slider"
-    axis: Literal["horizontal", "vertical"]
-    zones: list[SliderZone] = Field(min_length=1)
-
-
-Behavior = Annotated[Button | Toggle | Slider, Field(discriminator="kind")]
-
-
-class Control(_Strict):
-    id: str = Field(min_length=1, description="Stable across recompiles. Never reuse a removed id.")
-    label: str = Field(description="What the person wrote, verbatim as best read.")
+    id: str = Field(min_length=1)
+    kind: ElementKind
+    content: str = Field(description="As written. LaTeX for math.")
+    spoken: str = Field(default="", description="Plain-language reading for screen readers.")
     region: Region
-    behavior: Behavior
-    rationale: str = Field(
-        default="",
-        description="One line: how the drawn notation was interpreted. Shown in the overlay.",
-    )
 
 
-class Question(_Strict):
-    """Asked instead of guessing when the drawing is ambiguous."""
+class BoardDiff(_Strict):
+    """Model output for one keyframe: only what changed since the current board."""
 
-    control_id: str | None = None
-    text: str
-    options: list[str] = Field(default_factory=list)
-
-
-class ControlSpec(_Strict):
-    version: int = Field(ge=0)
-    controls: list[Control] = Field(default_factory=list)
-    questions: list[Question] = Field(default_factory=list)
-
-    def by_id(self) -> dict[str, Control]:
-        return {c.id: c for c in self.controls}
-
-
-class SpecDiff(_Strict):
-    """Recompile output: only what changed. Unchanged controls keep their ids and state."""
-
-    added: list[Control] = Field(default_factory=list)
-    removed: list[str] = Field(default_factory=list)
-    updated: list[Control] = Field(default_factory=list)
-    questions: list[Question] = Field(default_factory=list)
+    added: list[BoardElement] = Field(default_factory=list)
+    updated: list[BoardElement] = Field(default_factory=list)  # same id, more written / fixed
+    erased: list[str] = Field(default_factory=list)
 
     @property
     def is_empty(self) -> bool:
-        return not (self.added or self.removed or self.updated)
+        return not (self.added or self.updated or self.erased)
 
 
-class DiffError(ValueError):
-    pass
+class TimedElement(BoardElement):
+    """A board element with pipeline-owned timing. Never produced by the model."""
+
+    first_seen: float = Field(ge=0)
+    last_updated: float = Field(ge=0)
+    erased_at: float | None = None
+
+    def alive_at(self, t: float) -> bool:
+        return self.first_seen <= t and (self.erased_at is None or t < self.erased_at)
 
 
-def apply_diff(spec: ControlSpec, diff: SpecDiff) -> ControlSpec:
-    """Deterministically apply a SpecDiff. Raises DiffError on inconsistent diffs."""
-    current = spec.by_id()
-    for cid in diff.removed:
-        if cid not in current:
-            raise DiffError(f"removed unknown control {cid!r}")
-        del current[cid]
-    for c in diff.updated:
-        if c.id not in current:
-            raise DiffError(f"updated unknown control {c.id!r}")
-        current[c.id] = c
-    for c in diff.added:
-        if c.id in current or c.id in diff.removed or c.id in spec.by_id():
-            raise DiffError(f"added control reuses id {c.id!r}")
-        current[c.id] = c
-    ordered = [current[c.id] for c in spec.controls if c.id in current]
-    ordered += [c for c in diff.added]
-    return ControlSpec(version=spec.version + 1, controls=ordered, questions=diff.questions)
+# --------------------------------------------------------------------------- references
+
+RefKind = Literal["deictic", "role", "anaphora"]
 
 
-def iter_action_names(action: Action):
-    """Yield every adapter action name referenced inside an Action tree."""
-    if isinstance(action, (Tap, Hold, Release)):
-        yield action.action
-    elif isinstance(action, Sequence):
-        for s in action.steps:
-            yield from iter_action_names(s)
-    elif isinstance(action, Repeat):
-        yield from iter_action_names(action.body)
+class ReferencePhrase(_Strict):
+    """A spoken phrase that points at something.
+
+    deictic: "this term", "over here"; role: "the first", "the inside";
+    anaphora: "the problem I just gave you", "the equation from before".
+    """
+
+    id: str
+    text: str
+    kind: RefKind
+    start: float = Field(ge=0)
+    end: float = Field(ge=0)
+    word_start: int = Field(ge=0)  # index into the word list, inclusive
+    word_end: int = Field(ge=0)    # exclusive
+
+
+class ResolveOutput(_Strict):
+    """Model output for one phrase. element_id=None means the model abstained."""
+
+    element_id: str | None
+    quote: str = Field(default="", description="The referent as written on the board.")
+    confidence: float = Field(ge=0, le=1)
+    evidence: list[str] = Field(default_factory=list)
+
+
+class Resolution(_Strict):
+    """Validator output: what the user actually sees."""
+
+    phrase_id: str
+    status: Literal["resolved", "unresolved"]
+    element_id: str | None = None
+    quote: str = ""
+    confidence: float = Field(default=0.0, ge=0, le=1)
+    evidence: list[str] = Field(default_factory=list)
+    note: str = ""                      # why unresolved
+    suggested_element_id: str | None = None  # low-confidence guess, shown as "possibly"
+
+
+# --------------------------------------------------------------------------- document
+
+
+class LectureDoc(_Strict):
+    title: str
+    source: str
+    duration: float = Field(ge=0)
+    words: list[Word]
+    elements: list[TimedElement]
+    phrases: list[ReferencePhrase]
+    resolutions: list[Resolution]
+    models: dict[str, str] = Field(default_factory=dict)

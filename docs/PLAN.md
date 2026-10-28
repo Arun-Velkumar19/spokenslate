@@ -1,55 +1,49 @@
-# PaperOS build plan
+# Seed build plan
 
-Oct 26 – Nov 4, 2026. Solo. Submission deadline Nov 4, 9:00 PM ET = **7:00 PM Arizona**
-(re-check the official rules at kickoff). Target submitting by early afternoon.
+Pivoted from PaperOS on Oct 27 after the playground test passed (10/10 references, 0
+confident wrong). Deadline **Nov 4, 7:00 PM Arizona**. Target: submitted by early afternoon.
+Part-time solo: count real hours per day and pull work earlier if weekdays are thin.
 
-## Before kickoff (Oct 25)
-- [ ] Count real hours per day Oct 26 – Nov 4 (classes, work). Write them here:
-  | Mon 26 | Tue 27 | Wed 28 | Thu 29 | Fri 30 | Sat 31 | Sun 1 | Mon 2 | Tue 3 | Wed 4 |
-  |---|---|---|---|---|---|---|---|---|---|
-  |   |   |   |   |   |   |   |   |   |   |
-  If weekdays are ~4h, pull the Spark/Wonder benchmark and scope lock earlier.
-- [ ] Meta Model API account + payment method + spending cap; note Team ID for the credit form.
-- [ ] Check employer policy on accepting the $150 credits (optional to claim).
-- [ ] Play bitrun once; confirm keys (shield hold vs tap) and pick a forgiving section.
-- [ ] Camera mount working at ~35–50°.
+## Judging (weights) and how Seed scores
+- **Impact 30%**: blind/low-vision students lose everything on the board. Evidence: SAILS
+  conversation (emailed Oct 27), published "describe what you write" instructor guidance,
+  benchmark numbers. Be honest: not yet tested with blind users.
+- **Meta tooling 25%**: SAM 3.1 + Muse Spark (+ Wonder escalation) + Voice Transcribe, each
+  essential. Unexpected capability: resolving a reference to something hidden under the hand.
+- **Technical 20%**: validated JSON contracts, timeline with erased content, hallucination
+  guard, benchmark with abstention.
+- **Demo 25%**: hosted pages judges can open with a screen reader; VoiceOver in the video.
 
-## Oct 26 checklist
-- [x] Page detection + homography + flattened snapshot (`calibration/page.py`, 16 tests)
-- [x] Fingertip camera px + hand presence (`sensing/hand.py`, Tasks VIDEO); fake-result tests and synthetic `page_preview.py --hand` wiring/coordinate tests
-- [ ] Verify `scripts/page_preview.py --hand` on a real camera: fingertip dot + normalized page coords, rotation, hand occlusion over page corners
-- [ ] Run `scripts/page_preview.py` on the real camera; set rotation in `.env`; save 5 snapshots of hand-drawn layouts
-- [ ] First Muse compile on a saved snapshot (confirm API base URL, model IDs, image input)
-- [ ] Acoustic tap experiment (bare desk vs mousepad; narration/typing false triggers)
-- [ ] bitrun: confirm keys in-game, shield hold vs tap
+## Open verifications (do first, Oct 27)
+- [ ] Playground **Get code**: chat request shape with images, JSON mode → match `models/muse.py`
+- [ ] **Audio**: does Voice Transcribe return word-level timestamps? If not: decide fallback
+      (local Whisper is a new dependency → explicit decision)
+- [ ] **Segment**: SAM 3.1 "person" mask on a lecture frame; note request/response shape
+- [ ] **Abstention test**: 2–3 genuinely ambiguous moments; model must say unresolved
+- [ ] **Second lecturer** (MIT OCW 18.06 Strang, chalkboard): repeat 5 references
 
 ## Calendar
 
 | Date | Outcome | Gate |
 |---|---|---|
-| Oct 26 | Page calibration + rectified snapshot; first Muse compile; **acoustic tap experiment**; bitrun keymap verified | — |
-| Oct 27 | Spark vs Wonder: parse quality + latency on 10 drawings; pick one. Fingertip → page coords | compile latency measured |
-| Oct 28 | **Scope lock.** Freeze primitives and action vocab (NOT notation). Pick movement method (toggle vs slider) | — |
-| Oct 29 | **Kill test**: press vs hover | 27/30 presses, ≤3/30 false hovers → else fallback, no pivot |
-| Oct 30 | Engine + adapter end-to-end on bitrun; overlay with rationale text | — |
-| Oct 31 | Compound instructions working live in bitrun; compile gate trials | 8/10 compound compiles, ≥5 drawn by others |
-| Nov 1 | Live edit: stable-edit detection, diff recompile, **cross-out = delete** | edit without restart |
-| Nov 2 | Blind-layout reliability runs; fix weak spots only. **Write README + submission text tonight** | — |
-| Nov 3 | Record demo (one continuous take for the key beat); final reliability numbers | — |
-| Nov 4 | Final regression, upload, submit early | deadline 7 PM AZ |
+| Tue Oct 27 | Verifications above. Record your own 2–3 min whiteboard clip (rights-clean, controllable) | API shapes known |
+| Wed Oct 28 | First live end-to-end run on one clip (`process` → page). **Scope lock.** | page renders from real model output |
+| Thu Oct 29 | **Reference benchmark**: ≥15 references, 2 lecturers | ≥80% correct, **0 confident-wrong**, abstains on ambiguous |
+| Fri Oct 30 | Fingertip track from lecture video (`sensing/hand.py`, merged) → board coords → pointing candidates in real runs | candidates help on ≥1 case |
+| Sat Oct 31 | Math rendering per SAILS answer (MathML/KaTeX); VoiceOver pass on the page | navigable by headings with VoiceOver |
+| Sun Nov 1 | Baseline-vs-Seed table; host 2–3 lectures on GitHub Pages | public link works |
+| Mon Nov 2 | Fix weak spots only. **Write README + submission text tonight** | — |
+| Tue Nov 3 | Record demo video (VoiceOver beat in one take) | — |
+| Wed Nov 4 | Final check, upload, submit early | 7 PM AZ |
 
-## Acceptance gates (log to eval/)
-1. **Physical interaction**: 27/30 presses, ≤3/30 false hover activations, with the chosen method.
-2. **Semantic compilation**: ≥8/10 unseen compound instructions compile to correct behavior.
-   At least half drawn by people told only *what* it should do, not *how* to draw it.
-   A clarifying question followed by a correct compile counts as a pass.
-3. **Live modification**: add / cross out a control mid-session; target app keeps running,
-   unaffected controls (e.g. an active RUN toggle) keep working.
-4. **Latency**: edit-to-ready time measured and shown on screen. Don't promise a number
-   until it's measured.
+If the Oct 29 gate fails: ship with "possibly" suggestions and candidates highlighted
+rather than auto-resolution. Fallback, never pivot.
 
-## Rules
-- Freeze primitives, not notation.
-- Model never per-frame; never emits code; diffs only on recompile.
-- No browser automation, no generated code execution, no extra app integrations.
-- Fallback, never pivot.
+## Validation track (parallel, not blocking)
+- SAILS email sent Oct 27. Nudge Thu Oct 29; walk in (Wilson Hall) if silent.
+- Backup: Dr. Troy McDaniel (CUbiC), Arizona Association of Blind Students, AppleVis forum
+  (once there's a page to show). Lock whatever evidence exists by Sat Oct 31.
+
+## Cut list (do not build)
+Live classroom mode · slides · dictation / two-way math input (future work line only) ·
+translation · hosted upload backend (stretch after Nov 1 only) · multi-camera.

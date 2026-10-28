@@ -1,13 +1,14 @@
-# Evaluation logs
+# Evaluation
 
-One CSV per gate. Append a row per trial; commit results to `results/`.
-Raw images/audio stay in `data/captures/` (gitignored); reference them by filename.
+The number that matters: **confident-wrong = 0.** A wrong link misleads a blind student;
+"unresolved" is honest. Report correct / unresolved / wrong, and wrong-with-confidence ≥ 0.7.
 
-| File | Gate | Pass bar |
+| File | What | Gate (Oct 29) |
 |---|---|---|
-| `press_trials.csv` | physical interaction | ≥27/30 presses, ≤3/30 false hovers |
-| `compile_trials.csv` | semantic compilation | ≥8/10, ≥half drawn by others |
-| `edit_trials.csv` | live modification | edit applied, target never restarted, untouched controls unaffected |
-| `latency.csv` | compile / edit-to-ready | measured, reported as median + worst |
+| `references.csv` | one row per spoken reference, ground truth written BEFORE asking the model | ≥15 refs, 2 lecturers, ≥80% correct, 0 confident-wrong, abstains on ambiguous |
+| `latency.csv` | model call timings and attempts | report median + worst |
+| `results/` | committed result snapshots (playground runs, pipeline runs) | — |
 
-Log failures too. The final numbers go on screen in the demo.
+Rules: write the truth column first. Include genuinely ambiguous moments (truth =
+`unresolved`). Note any help the prompt gave (e.g. manually aligned words per frame).
+Raw video stays in `data/` (gitignored); reference lectures by title + timestamp.

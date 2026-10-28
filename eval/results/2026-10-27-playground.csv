@@ -1,0 +1,11 @@
+date,lecture,lecturer,t,phrase,kind,truth,model,answer,confidence,outcome,notes
+2026-10-27,Calc 2 Lecture 6.1 (YouTube),Professor Leonard,51:10,"the inside",role,"x^2+1 in d/dx[(x^2+1)^3]",muse-spark-1.3,"(x^2+1) on line 3",0.90,correct,"1 frame + caption; resolvable from math alone"
+2026-10-27,Calc 2 Lecture 6.1 (YouTube),Professor Leonard,~59:05,"the problem I just gave you",anaphora,"d/dx[(x^2+1)^3]",muse-spark-1.3,"d/dx[(x^2+1)^3] = 3(x^2+1)^2 d/dx[x^2+1]",0.90,correct,"3 frames, words per frame given manually; used later frames"
+2026-10-27,Calc 2 Lecture 6.1 (YouTube),Professor Leonard,~59:05,"this problem",deictic,"d/dx[cbrt(ln x)] -> (ln x)^(1/3)",muse-spark-1.3,"d/dx[cbrt(ln x)] -> d/dx[(ln x)^(1/3)]",0.85,correct,"same prompt"
+2026-10-27,Calc 2 Lecture 6.1 (YouTube),Professor Leonard,59:15,"over here",deictic,"ln x in the new problem (right board)",muse-spark-1.3,"ln x inside (ln x)^(1/3)",0.80,correct,"same prompt"
+2026-10-27,Calc 2 Lecture 6.1 (YouTube),Professor Leonard,59:15,"here (what we had here)",deictic,"(x^2+1)^3 (left board)",muse-spark-1.3,"d/dx[(x^2+1)^3]",0.85,correct,"pointing sweep to left board"
+2026-10-27,Calc 2 Lecture 6.1 (YouTube),Professor Leonard,59:20,"cover this",deictic,"ln x inside (ln x)^(1/3), hidden by hand",muse-spark-1.3,"ln x, hidden under right hand",0.85,correct,"referent occluded in the frame; prompt hinted it may be hidden"
+2026-10-27,Calc 2 Lecture 6.1 (YouTube),Professor Leonard,1:10:25-35,"(problem being worked)",context,"d/dx[x^3 ln 5x]",muse-spark-1.3,"Ex d/dx[x^3 ln 5x]",0.90,correct,"statement hidden in frames 1-2; prompt hinted"
+2026-10-27,Calc 2 Lecture 6.1 (YouTube),Professor Leonard,1:10:25-35,"the first / the second",role,"x^3 / ln(5x)",muse-spark-1.3,"x^3 / ln 5x",0.95,correct,"product rule roles"
+2026-10-27,Calc 2 Lecture 6.1 (YouTube),Professor Leonard,1:10:25,"(writing during 'derivative of the first')",writing,"d/dx[x^3]",muse-spark-1.3,"= d/dx [x^3 (in progress)",0.85,correct,"speech-to-writing alignment"
+2026-10-27,Calc 2 Lecture 6.1 (YouTube),Professor Leonard,1:10:35+,"(completion of 'the derivative of the...')",writing,"d/dx[ln 5x]",muse-spark-1.3,"ln 5x",0.90,correct,"speech-to-writing alignment"

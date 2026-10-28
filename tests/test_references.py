@@ -1,0 +1,51 @@
+from fixtures import words
+
+from paperos.references import find_reference_phrases
+
+
+def texts(s):
+    return [(p.text, p.kind) for p in find_reference_phrases(words(s))]
+
+
+def test_leonard_sentences():
+    assert texts("the similarity between the problem I just gave you and this problem right") \
+        == [("the problem", "anaphora"), ("this problem", "deictic")]
+    assert texts("No, I know there's an ln over here, but what we had here, we had something") \
+        == [("over here,", "deictic"), ("here,", "deictic")]
+    assert texts("if I cover this with my hand do I have something to some power") \
+        == [("this", "deictic")]
+
+
+def test_roles_product_rule():
+    got = texts("derivative of the first times the second plus the first times the derivative of the second")
+    assert got == [("the first", "role"), ("the second", "role"),
+                   ("the first", "role"), ("the second", "role")]
+
+
+def test_inside():
+    assert texts("multiply by the derivative of whatever the inside is") == [("the inside", "role")]
+
+
+def test_conjunction_that_and_existential_there_skipped():
+    assert texts("notice that it cancels") == []
+    assert texts("so that we can integrate") == []
+    assert texts("there is a constant and there are two roots") == []
+    assert texts("the first time I saw this") == [("this", "deictic")]
+
+
+def test_object_that_kept():
+    assert texts("now cancel that and we're done") == [("that", "deictic")]
+    assert texts("that term goes away") == [("that term", "deictic")]
+
+
+def test_timestamps_and_spans():
+    ws = words("cover this term now", start=10.0, step=0.5)
+    (p,) = find_reference_phrases(ws)
+    assert (p.word_start, p.word_end) == (1, 3)
+    assert p.start == ws[1].start and p.end == ws[2].end
+
+
+def test_anaphora_needs_a_pointer_back():
+    assert texts("plug it into the equation from before") == [("the equation", "anaphora")]
+    assert texts("the equation is linear") == []          # generic, not pointing back
+    assert texts("the derivative of the inside") == [("the inside", "role")]
