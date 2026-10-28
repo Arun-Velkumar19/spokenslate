@@ -10,8 +10,9 @@ dist/
 
 .env
 
-# raw captures stay local; trial logs in eval/results are committed
-data/captures/
+# raw video/audio/captures stay local; eval results are committed
+data/
+site/
 *.mp4
 *.wav
 .DS_Store

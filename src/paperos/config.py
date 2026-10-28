@@ -10,13 +10,17 @@ from dotenv import load_dotenv
 
 @dataclass(frozen=True)
 class Settings:
-    api_key: str
-    base_url: str
-    compile_model: str
-    alt_model: str
-    camera_index: int
-    mic_device: str | None
-    target: str
+    api_key: str = ""
+    base_url: str = "https://api.meta.ai/v1"
+    # Seed models (playground-verified Oct 27: muse-spark-1.3 resolved 10/10 references)
+    board_model: str = "muse-spark-1.3"      # reads the board each keyframe
+    resolve_model: str = "muse-spark-1.3"    # resolves spoken references
+    escalate_model: str = "muse-wonder-1.0"  # retry when Spark abstains (offline: speed ok)
+    transcribe_model: str = "muse-voice-transcribe-1.0"
+    sam_model: str = ""                      # SAM 3.1 id on the Model API: verify
+    confidence_threshold: float = 0.7
+    # camera / page tools (scripts/page_preview.py, sensing/hand.py)
+    camera_index: int = 0
     paper: str = "letter"
     orientation: str = "landscape"
     page_rotation: int = 0
@@ -24,15 +28,18 @@ class Settings:
 
 def load_settings() -> Settings:
     load_dotenv()
+    env = os.getenv
     return Settings(
-        api_key=os.getenv("META_API_KEY", ""),
-        base_url=os.getenv("META_API_BASE_URL", ""),
-        compile_model=os.getenv("PAPEROS_COMPILE_MODEL", "muse-spark-1.1"),
-        alt_model=os.getenv("PAPEROS_ALT_MODEL", "muse-wonder-1.0"),
-        camera_index=int(os.getenv("PAPEROS_CAMERA_INDEX", "0")),
-        mic_device=os.getenv("PAPEROS_MIC_DEVICE") or None,
-        target=os.getenv("PAPEROS_TARGET", "bitrun"),
-        paper=os.getenv("PAPEROS_PAPER", "letter"),
-        orientation=os.getenv("PAPEROS_ORIENTATION", "landscape"),
-        page_rotation=int(os.getenv("PAPEROS_PAGE_ROTATION", "0")),
+        api_key=env("META_API_KEY", ""),
+        base_url=env("META_API_BASE_URL") or Settings.base_url,
+        board_model=env("SEED_BOARD_MODEL", Settings.board_model),
+        resolve_model=env("SEED_RESOLVE_MODEL", Settings.resolve_model),
+        escalate_model=env("SEED_ESCALATE_MODEL", Settings.escalate_model),
+        transcribe_model=env("SEED_TRANSCRIBE_MODEL", Settings.transcribe_model),
+        sam_model=env("SEED_SAM_MODEL", ""),
+        confidence_threshold=float(env("SEED_CONFIDENCE_THRESHOLD", "0.7")),
+        camera_index=int(env("PAPEROS_CAMERA_INDEX", "0")),
+        paper=env("PAPEROS_PAPER", "letter"),
+        orientation=env("PAPEROS_ORIENTATION", "landscape"),
+        page_rotation=int(env("PAPEROS_PAGE_ROTATION", "0")),
     )

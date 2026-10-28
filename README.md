@@ -1,100 +1,52 @@
-# PaperOS
+# Seed (working name)
 
-**Draw it. Compile it. Control it.**
+**A lecture is two streams: what's said and what's written. Transcripts keep only one.**
 
-PaperOS makes a paper interface *live-programmable*. Draw controls on an ordinary sheet of paper, a Meta model compiles the drawing into a validated control spec, and the paper stays the physical controller. Edit it with a pen mid-session and the behavior updates without restarting the target app.
+Seed turns a recorded whiteboard lecture into an accessible page: every board step as math,
+at the moment it was written, with spoken references like *"this term cancels"* linked to
+the exact thing on the board. When it isn't sure, it says so. Erased steps are kept.
 
-> Status (Oct 26): implemented and tested: `spec`, `validator`, `runtime/engine`, `adapters/keyboard`, `calibration/page`. `compiler` written but untested against the live API. Stubs: sensing, edits, overlay, main loop.
+Built first for blind and low-vision students, for whom "this term" is a dead end.
+
+> Status (Oct 27, 2026): core pipeline built and tested on fake models and real video files.
+> Live Meta API wiring is next. Playground evidence: `muse-spark-1.3` resolved 10/10 spoken
+> references on a real calculus lecture (`eval/results/`).
 
 ## How it works
 
-```
-camera snapshot ──► page calibration (homography, rectify)
-                         │
-                         ▼
-             Muse (compile / diff-recompile)  ◄── optional: target app controls screenshot
-                         │
-                         ▼
-             ControlSpec (typed, validated)  ── fixed primitives, open notation
-                         │
-live frames ──► fingertip tracking ─┐
-mic ──────────► tap onsets ─────────┼──► press/toggle/slider events
-                                    ▼
-                    deterministic runtime engine
-                                    │
-                                    ▼
-                    adapter (keyboard emulation) ──► target app (bitrun)
-```
+| Step | Meta model | Job |
+|---|---|---|
+| Lecturer masking | SAM 3.1 | so the board is read even when the professor stands in front of it |
+| Board reading | Muse Spark | each written line → LaTeX + plain-language reading, tracked over time |
+| Speech | Muse Voice Transcribe | words with timestamps |
+| Reference resolution | Muse Spark (Wonder as fallback) | "this term" → the specific board element, with evidence + confidence |
 
-Key rules:
-- The model never runs per frame. It compiles once and recompiles on stable edits, as a **diff** against the current spec.
-- The model never emits executable code. It emits a `ControlSpec` built only from fixed primitives; the validator rejects anything outside the adapter's allowed actions.
-- **Freeze primitives, not notation.** The person can improvise arrows, words, numbers; the model maps them onto the primitives.
+Deterministic code assigns ids and times, finds reference phrases, ranks pointing candidates
+from fingertip tracking, and **validates every answer**: an invented element, a quote that
+doesn't match the board, or low confidence all become "unresolved", never a guess.
 
-## Layout
-
-```
-src/paperos/
-  config.py            env + settings
-  spec.py              ControlSpec contract (primitives)
-  validator.py         spec ↔ adapter whitelist checks
-  calibration/page.py  paper detection, homography, rectified snapshot
-  sensing/hand.py      fingertip tracking
-  sensing/acoustic.py  tap onset detection
-  sensing/press.py     fusion → PressEvent / slider values
-  compiler/            Muse client, prompts, diff recompile
-  runtime/engine.py    deterministic executor
-  runtime/edits.py     stable-edit detection (page still, no hand)
-  adapters/keyboard.py keyboard emulation + bitrun keymap
-  overlay.py           on-screen overlay
-  main.py              entry point
-scripts/page_preview.py  live check of paper detection + flattened page
-eval/                  acceptance-gate trial logs
-docs/                  PLAN, DEMO shot list, PRIOR_ART
-```
-
-## Setup
-
-Requires Python 3.11+.
+## Use
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-cp .env.example .env   # fill in API key, base URL, model IDs
-pytest                 # spec, validator, engine: runs without camera or API
+cp .env.example .env            # add META_API_KEY
+pytest -q
+
+python -m paperos process lecture.mp4 --words words.json --out site/ \
+  --title "Calculus 2, 6.1" --source "credit line"
 ```
 
-Hand tracking uses the MediaPipe **Tasks** API (`HandLandmarker`); the legacy
-`mp.solutions.hands` API is gone in mediapipe 1.x. Download `hand_landmarker.task`
-from the MediaPipe docs into `models/`.
+Output: `site/lecture.html` (the accessible page) and `site/lecture.json` (everything,
+including evidence for each resolved reference).
 
-Set a spending cap/alert in the Meta Model API console. Credits are applied before your card is charged.
+## Docs
 
-## Day-1 camera check
-
-```bash
-python scripts/page_preview.py
-```
-
-Green outline = page locked. The **page** window must show your handwriting upright;
-press `r` until it does and copy the printed `PAPEROS_PAGE_ROTATION` into `.env`
-(180 is typical when the camera faces you). `s` saves a frame + flattened page to
-`data/captures/` for testing the compiler.
-
-## Run (once implemented)
-
-```bash
-python -m paperos --camera 0 --target bitrun
-```
-
-## Demo target
-
-[bitrun](https://slashlab.itch.io/bitrun) by Phorb: open-source HTML5 platformer, assets CC BY-SA 4.0. Played in the browser, not redistributed. Credit in video and submission.
-
-## Prior art
-
-PaperOS builds on a decade of paper-interface work. See [docs/PRIOR_ART.md](docs/PRIOR_ART.md).
+- [`AGENTS.md`](AGENTS.md): handoff for coding agents (invariants, status, gotchas)
+- [`docs/PLAN.md`](docs/PLAN.md): calendar and gates
+- [`docs/DEMO.md`](docs/DEMO.md): video shot list
+- [`docs/PRIOR_ART.md`](docs/PRIOR_ART.md): what exists and what's different
 
 ## Hackathon
 
-Meta Global AI Developer Hackathon. Indie track, Oct 26 – Nov 4, 2026.
+Meta Global AI Developer Hackathon, Indie track, Oct 26 – Nov 4, 2026.
