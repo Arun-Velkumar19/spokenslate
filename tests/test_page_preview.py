@@ -8,8 +8,8 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from paperos.calibration import page
-from paperos.sensing.hand import HandTracker
+from spokenslate.calibration import page
+from spokenslate.sensing.hand import HandTracker
 
 spec = importlib.util.spec_from_file_location(
     "page_preview", Path(__file__).parents[1] / "scripts" / "page_preview.py"
@@ -110,7 +110,7 @@ def test_preview_updates_hands_before_page_and_draws_page_coords(monkeypatch, tm
 
 
 def test_fingertip_without_page_lock_is_labeled(monkeypatch):
-    from paperos.sensing.hand import Fingertip
+    from spokenslate.sensing.hand import Fingertip
 
     texts = []
     monkeypatch.setattr(preview.cv2, "putText", lambda img, text, *args: texts.append(text))

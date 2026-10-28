@@ -1,10 +1,10 @@
 from fixtures import el, leonard_timeline, words
 
-from paperos.pointing import candidates, pointing_at
-from paperos.references import find_reference_phrases
-from paperos.render import render_html
-from paperos.spec import BoardDiff, LectureDoc, ResolveOutput
-from paperos.validator import validate_resolution
+from spokenslate.pointing import candidates, pointing_at
+from spokenslate.references import find_reference_phrases
+from spokenslate.render import render_html
+from spokenslate.spec import BoardDiff, LectureDoc, ResolveOutput
+from spokenslate.validator import validate_resolution
 
 
 def test_pointing_candidates_rank_by_distance():

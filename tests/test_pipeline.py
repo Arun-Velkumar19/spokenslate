@@ -3,11 +3,11 @@
 import numpy as np
 from fixtures import CHAIN, CUBE_ROOT, words
 
-from paperos.models.muse import ResolveRequest
-from paperos.pipeline import Clients, assign_ids, process
-from paperos.render import render_html
-from paperos.spec import BoardDiff, ResolveOutput
-from paperos.video import select_keyframes
+from spokenslate.models.muse import ResolveRequest
+from spokenslate.pipeline import Clients, assign_ids, process
+from spokenslate.render import render_html
+from spokenslate.spec import BoardDiff, ResolveOutput
+from spokenslate.video import select_keyframes
 
 
 class FakeVideo:
@@ -101,7 +101,7 @@ def test_real_video_file_last_frame(tmp_path):
     """Regression: on real files, t == duration has no frame; frame_at must clamp."""
     import cv2
 
-    from paperos.video import VideoFile
+    from spokenslate.video import VideoFile
 
     path = tmp_path / "clip.mp4"
     w = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"mp4v"), 10, (640, 360))

@@ -23,9 +23,9 @@ from typing import Any
 
 import cv2
 
-from paperos.config import load_settings
-from paperos.models.muse import MuseClient, MuseError
-from paperos.video import to_jpeg
+from spokenslate.config import load_settings
+from spokenslate.models.muse import MuseClient, MuseError
+from spokenslate.video import to_jpeg
 
 
 def redact(kwargs: dict[str, Any]) -> dict[str, Any]:

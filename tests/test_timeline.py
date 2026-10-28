@@ -1,8 +1,8 @@
 import pytest
 from fixtures import CHAIN, CUBE_ROOT, el, leonard_timeline
 
-from paperos.spec import BoardDiff
-from paperos.timeline import DiffError, Timeline
+from spokenslate.spec import BoardDiff
+from spokenslate.timeline import DiffError, Timeline
 
 
 def test_alive_and_erased_kept():

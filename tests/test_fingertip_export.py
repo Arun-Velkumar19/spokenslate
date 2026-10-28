@@ -10,11 +10,11 @@ import numpy as np
 import pytest
 from fixtures import CHAIN, words
 
-from paperos import main, video
-from paperos.config import Settings
-from paperos.models import muse
-from paperos.sensing import hand
-from paperos.spec import BoardDiff, ResolveOutput
+from spokenslate import main, video
+from spokenslate.config import Settings
+from spokenslate.models import muse
+from spokenslate.sensing import hand
+from spokenslate.spec import BoardDiff, ResolveOutput
 
 spec = importlib.util.spec_from_file_location(
     "fingertips", Path(__file__).parents[1] / "scripts" / "fingertips.py"

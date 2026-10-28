@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import pytest
 
-from paperos.calibration.page import PageTracker, detect_quad
+from spokenslate.calibration.page import PageTracker, detect_quad
 
 H, W = 720, 1280
 # A landscape letter page seen at an angle: far edge (top of frame) narrower.
@@ -164,7 +164,7 @@ def test_rectified_page_is_flat():
 
 
 def test_skips_redetection_while_locked(monkeypatch):
-    from paperos.calibration import page
+    from spokenslate.calibration import page
     t = locked_tracker(detect_every=3)
     calls = []
     real = page.detect_quad

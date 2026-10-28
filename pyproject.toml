@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "paperos"
+name = "spokenslate"
 version = "0.0.1"
-description = "Seed: board-aware, accessible lecture transcripts"
+description = "SpokenSlate: board-aware, accessible lecture transcripts"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -21,7 +21,7 @@ dependencies = [
 dev = ["pytest", "ruff"]
 
 [project.scripts]
-paperos = "paperos.main:main"
+spokenslate = "spokenslate.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

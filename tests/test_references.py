@@ -1,6 +1,6 @@
 from fixtures import words
 
-from paperos.references import find_reference_phrases
+from spokenslate.references import find_reference_phrases
 
 
 def texts(s):

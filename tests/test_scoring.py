@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from paperos.scoring import (
+from spokenslate.scoring import (
     TruthRow,
     baseline,
     load_truth,
@@ -13,7 +13,7 @@ from paperos.scoring import (
     phrase_matches,
     score_doc,
 )
-from paperos.spec import LectureDoc, ReferencePhrase, Region, Resolution, TimedElement
+from spokenslate.spec import LectureDoc, ReferencePhrase, Region, Resolution, TimedElement
 
 spec = importlib.util.spec_from_file_location(
     "score", Path(__file__).parents[1] / "scripts" / "score.py"
@@ -93,7 +93,7 @@ def test_all_four_outcomes_and_baseline():
     s = score_doc(rows, d)
     assert [j.outcome for j in s.judged] == [
         "correct", "correct", "wrong", "wrong", "unresolved", "correct", "wrong", "unresolved"]
-    assert s.row() == {"system": "seed", "n": 8, "correct": 3, "unresolved": 2, "wrong": 3,
+    assert s.row() == {"system": "spokenslate", "n": 8, "correct": 3, "unresolved": 2, "wrong": 3,
                        "confident_wrong": 2, "missed": 1}
     assert [j.confident_wrong for j in s.judged][2:7] == [True, False, False, False, True]
 
@@ -151,6 +151,6 @@ def test_cli_prints_seed_and_baseline_rows(tmp_path, capsys):
     out = capsys.readouterr().out.splitlines()
     assert out[0].split() == ["system", "n", "correct", "unresolved", "wrong",
                               "confident_wrong", "missed"]
-    assert out[1].split() == ["seed", "1", "1", "0", "0", "0", "0"]
+    assert out[1].split() == ["spokenslate", "1", "1", "0", "0", "0", "0"]
     assert out[2].split() == ["transcript", "(baseline)", "1", "0", "1", "0", "0", "1"]
     assert "correct" in out[3] and "phrase=p1" in out[3]

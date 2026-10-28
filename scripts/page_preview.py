@@ -1,6 +1,6 @@
 """Day-1 check: does the camera find the paper, and does the flattened page look right?
 
-    python scripts/page_preview.py            # camera from .env (PAPEROS_CAMERA_INDEX)
+    python scripts/page_preview.py            # camera from .env (SPOKENSLATE_CAMERA_INDEX)
     python scripts/page_preview.py --camera 1
     python scripts/page_preview.py --hand     # needs models/hand_landmarker.task
 
@@ -26,9 +26,9 @@ from contextlib import ExitStack
 import cv2
 import numpy as np
 
-from paperos.calibration.page import PageTracker, detect_quad
-from paperos.config import load_settings
-from paperos.sensing.hand import DEFAULT_MODEL_PATH, Fingertip, HandTracker
+from spokenslate.calibration.page import PageTracker, detect_quad
+from spokenslate.config import load_settings
+from spokenslate.sensing.hand import DEFAULT_MODEL_PATH, Fingertip, HandTracker
 
 CYAN = (255, 220, 0)
 GREEN, YELLOW, WHITE = (60, 200, 60), (0, 210, 255), (255, 255, 255)
@@ -152,7 +152,7 @@ def main() -> None:
             if key == ord("r"):
                 tracker.set_rotation(tracker.rotation + 90)
                 print(
-                    f"rotation={tracker.rotation}  ->  put PAPEROS_PAGE_ROTATION={tracker.rotation} in .env"
+                    f"rotation={tracker.rotation}  ->  put SPOKENSLATE_PAGE_ROTATION={tracker.rotation} in .env"
                 )
             if key == ord("s"):
                 stamp = time.strftime("%Y%m%d-%H%M%S")

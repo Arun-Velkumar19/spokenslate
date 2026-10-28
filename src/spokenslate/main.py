@@ -1,7 +1,7 @@
 """CLI.
 
-    python -m paperos process lecture.mp4 --words words.json --out site/ --title "Calc 2, 6.1"
-    python -m paperos render site/lecture.json --out site/lecture.html
+    python -m spokenslate process lecture.mp4 --words words.json --out site/ --title "Calc 2, 6.1"
+    python -m spokenslate render site/lecture.json --out site/lecture.html
 
 `process` writes <out>/<stem>.json (the LectureDoc) and <out>/<stem>.html (the page).
 Without --words it transcribes the audio (Muse Voice Transcribe; unverified, see
@@ -16,16 +16,16 @@ import logging
 import tempfile
 from pathlib import Path
 
-from paperos.config import load_settings
-from paperos.render import render_html
-from paperos.spec import LectureDoc
+from spokenslate.config import load_settings
+from spokenslate.render import render_html
+from spokenslate.spec import LectureDoc
 
 
 def _process(args: argparse.Namespace) -> None:
-    from paperos.models.muse import MuseClient
-    from paperos.models.transcribe import MuseTranscriber, load_words
-    from paperos.pipeline import Clients, process
-    from paperos.video import VideoFile, extract_audio
+    from spokenslate.models.muse import MuseClient
+    from spokenslate.models.transcribe import MuseTranscriber, load_words
+    from spokenslate.pipeline import Clients, process
+    from spokenslate.video import VideoFile, extract_audio
 
     s = load_settings()
     video = Path(args.video)
@@ -63,7 +63,7 @@ def _render(args: argparse.Namespace) -> None:
 
 
 def main(argv: list[str] | None = None) -> None:
-    p = argparse.ArgumentParser(prog="paperos", description="Seed: board-aware lecture transcripts")
+    p = argparse.ArgumentParser(prog="spokenslate", description="SpokenSlate: board-aware lecture transcripts")
     sub = p.add_subparsers(dest="cmd", required=True)
     pr = sub.add_parser("process", help="lecture video -> accessible page")
     pr.add_argument("video")

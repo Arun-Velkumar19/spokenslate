@@ -1,7 +1,7 @@
 from fixtures import leonard_timeline
 
-from paperos.spec import ReferencePhrase, ResolveOutput
-from paperos.validator import quote_matches, validate_resolution
+from spokenslate.spec import ReferencePhrase, ResolveOutput
+from spokenslate.validator import quote_matches, validate_resolution
 
 
 def phrase(start, end=None, text="this"):

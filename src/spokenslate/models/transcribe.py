@@ -1,6 +1,6 @@
 """Speech -> timestamped words.
 
-Seed needs WORD-level timestamps: a point lines up with the words spoken at that instant,
+SpokenSlate needs WORD-level timestamps: a point lines up with the words spoken at that instant,
 not the whole sentence (see the Oct 27 "the problem I just gave you" case).
 
 UNVERIFIED: whether Muse Voice Transcribe returns word timestamps, and its request shape.
@@ -14,7 +14,7 @@ import json
 from pathlib import Path
 from typing import Protocol
 
-from paperos.spec import Word
+from spokenslate.spec import Word
 
 
 class Transcriber(Protocol):

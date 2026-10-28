@@ -1,16 +1,17 @@
-# Seed: agent handoff
+# SpokenSlate: agent handoff
 
 Read this before touching code. It applies to every coding agent (Codex, Claude Code, etc.).
 Owner: Roon (solo). Meta Global AI Developer Hackathon, Indie track.
 **Submission deadline: Nov 4, 2026, 7:00 PM Arizona (9:00 PM ET).** Target: submitted by early afternoon.
 
-"Seed" is a working name; the Python package is still `paperos` (the project pivoted from
-PaperOS on Oct 27). A rename is one PR once the name is picked. Don't rename on your own.
+Product name **SpokenSlate**; repo, package, and CLI `spokenslate`. The project pivoted from
+PaperOS on Oct 27 (briefly called "Seed"). Env vars are `SPOKENSLATE_*`; the old `SEED_*` /
+`PAPEROS_*` names are still read as fallbacks so existing `.env` files keep working.
 
 ## What this is
 
 A board-aware lecture transcript. A whiteboard lecture is two streams: what's **said** and
-what's **written**. Transcripts keep only the first. Seed takes a recorded lecture clip and
+what's **written**. Transcripts keep only the first. SpokenSlate takes a recorded lecture clip and
 produces an accessible web page where:
 1. each line written on the board appears, as math, at the moment it was written
 2. spoken references ("this term cancels", "the first", "the problem I just gave you")
@@ -73,7 +74,7 @@ Plan, gates, calendar: `docs/PLAN.md`. Demo: `docs/DEMO.md`. Prior art: `docs/PR
 ## Layout
 
 ```
-src/paperos/
+src/spokenslate/
   spec.py          Word, BoardElement/Diff, TimedElement, ReferencePhrase, ResolveOutput,
                    Resolution, LectureDoc
   timeline.py      apply BoardDiffs atomically; alive_at / alive_during; erased kept
@@ -98,8 +99,8 @@ docs/              PLAN, DEMO, PRIOR_ART
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 pytest -q && ruff check src tests scripts          # both must pass before every commit
-python -m paperos process clip.mp4 --words words.json --out site/ --title "..." --source "credit"
-python -m paperos render site/clip.json --out site/clip.html
+python -m spokenslate process clip.mp4 --words words.json --out site/ --title "..." --source "credit"
+python -m spokenslate render site/clip.json --out site/clip.html
 ```
 `ffmpeg` must be installed for audio extraction (`brew install ffmpeg`).
 

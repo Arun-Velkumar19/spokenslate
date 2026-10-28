@@ -1,7 +1,7 @@
-"""Seed data contracts.
+"""SpokenSlate data contracts.
 
 A lecture is two streams: what was SAID (timestamped words) and what was WRITTEN (board
-elements that appear, change, and get erased). Seed joins them, and resolves spoken
+elements that appear, change, and get erased). SpokenSlate joins them, and resolves spoken
 references ("this term", "the first", "over here") to specific board elements.
 
 Rules the contracts enforce:
