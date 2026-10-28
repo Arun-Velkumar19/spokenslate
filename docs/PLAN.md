@@ -29,7 +29,7 @@ Part-time solo: count real hours per day and pull work earlier if weekdays are t
 | Tue Oct 27 | Verifications above. Record your own 2–3 min whiteboard clip (rights-clean, controllable) | API shapes known |
 | Wed Oct 28 | First live end-to-end run on one clip (`process` → page). **Scope lock.** | page renders from real model output |
 | Thu Oct 29 | **Reference benchmark**: ≥15 references, 2 lecturers | ≥80% correct, **0 confident-wrong**, abstains on ambiguous |
-| Fri Oct 30 | Fingertip → board coords (hand tracker PR #2) → pointing candidates in real runs | candidates help on ≥1 case |
+| Fri Oct 30 | Fingertip track from lecture video (`sensing/hand.py`, merged) → board coords → pointing candidates in real runs | candidates help on ≥1 case |
 | Sat Oct 31 | Math rendering per SAILS answer (MathML/KaTeX); VoiceOver pass on the page | navigable by headings with VoiceOver |
 | Sun Nov 1 | Baseline-vs-Seed table; host 2–3 lectures on GitHub Pages | public link works |
 | Mon Nov 2 | Fix weak spots only. **Write README + submission text tonight** | — |

@@ -64,7 +64,8 @@ fingertip track (hand.py) ──► pointing candidates ──┐          │  
 | `models/muse.py`, `models/prompts.py` | written; **not yet run against the live API** |
 | `models/transcribe.py` | `load_words` works; Muse transcription **unverified** (word timestamps?) |
 | `models/segment.py` | `NullSegmenter` only; SAM 3.1 API shape **unverified** |
-| `calibration/page.py`, `sensing/hand.py` | from PaperOS; hand tracking in PR #2 feeds pointing |
+| `sensing/hand.py` + `scripts/page_preview.py --hand` | MediaPipe Tasks fingertip (landmark 8) + hand presence; tested with a fake detector; **not verified on a real camera**; not yet wired into the pipeline (next: extract a fingertip track from lecture video → `--fingertips` JSON) |
+| `calibration/page.py` | from PaperOS; page detection for camera setups (lecture video uses frame coords, see gotchas) |
 
 Plan, gates, calendar: `docs/PLAN.md`. Demo: `docs/DEMO.md`. Prior art: `docs/PRIOR_ART.md`.
 
@@ -131,7 +132,9 @@ python -m paperos render site/clip.json --out site/clip.html
   Crop screenshots to the video (full-browser screenshots shrink the handwriting).
 - **Avoid `-contributor` model variants** until we know what they do with data. Free
   credits: Meta notes content may be used for product improvement.
-- **MediaPipe 1.x removed `mp.solutions.hands`.** Use Tasks API `HandLandmarker`.
+- **MediaPipe 1.x removed `mp.solutions.hands`.** Use Tasks API `HandLandmarker`. The model
+  file `models/hand_landmarker.task` is gitignored; download it from the
+  [MediaPipe hand landmarker models](https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker#models).
 - Meta Model API base URL `https://api.meta.ai/v1` (per LiteLLM docs). Confirm with the
   playground's "Get code", incl. image message format and JSON mode.
 

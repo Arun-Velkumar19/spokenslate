@@ -40,6 +40,17 @@ python -m paperos process lecture.mp4 --words words.json --out site/ \
 Output: `site/lecture.html` (the accessible page) and `site/lecture.json` (everything,
 including evidence for each resolved reference).
 
+## Pointing (hand tracking)
+
+Fingertip tracking (MediaPipe Tasks) gives the resolver ranked candidates for what the
+lecturer is pointing at. Download `hand_landmarker.task` from the
+[MediaPipe models page](https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker#models)
+into `models/` (gitignored). Live check with a webcam:
+
+```bash
+python scripts/page_preview.py --hand
+```
+
 ## Docs
 
 - [`AGENTS.md`](AGENTS.md): handoff for coding agents (invariants, status, gotchas)
