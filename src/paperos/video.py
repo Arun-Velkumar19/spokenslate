@@ -7,8 +7,10 @@ doesn't trigger a board read. A minimum gap bounds the number of paid model call
 
 from __future__ import annotations
 
+import math
 import shutil
 import subprocess
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Protocol
 
@@ -41,6 +43,40 @@ class VideoFile:
         if not ok:
             raise ValueError(f"no frame at t={t:.2f}s")
         return frame
+
+
+def iter_frames(path: Path, fps: float | None = None) -> Iterator[tuple[float, np.ndarray]]:
+    """Yield (t, frame) reading the file once, front to back (no per-frame seeks).
+
+    t is frame_index / native fps. With ``fps``, choose the nearest source frame
+    per interval; skipped frames are grabbed but not decoded into arrays. Rates
+    above native FPS yield each frame once. Close the iterator when stopping early.
+    """
+    if fps is not None and (not math.isfinite(fps) or fps <= 0):
+        raise ValueError("fps must be finite and greater than zero")
+    cap = cv2.VideoCapture(str(path))
+    step = 1.0 / fps if fps else 0.0
+    next_t = 0.0
+    idx = 0
+    try:
+        if not cap.isOpened():
+            raise FileNotFoundError(f"cannot open video {path}")
+        native = cap.get(cv2.CAP_PROP_FPS)
+        if not math.isfinite(native) or native <= 0:
+            raise ValueError(f"invalid source FPS for video {path}")
+        while cap.grab():
+            t = idx / native
+            idx += 1
+            # Half a source frame of slack so 30 fps -> 10 fps keeps exactly every 3rd frame.
+            if t + 0.5 / native < next_t:
+                continue
+            ok, frame = cap.retrieve()
+            if not ok:
+                break
+            next_t += step
+            yield t, frame
+    finally:
+        cap.release()
 
 
 def extract_audio(video: Path, out_wav: Path) -> Path:
