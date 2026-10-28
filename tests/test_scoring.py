@@ -101,10 +101,18 @@ def test_all_four_outcomes_and_baseline():
     assert (b["correct"], b["unresolved"], b["wrong"], b["confident_wrong"]) == (2, 6, 0, 0)
 
 
-def test_quote_matches_free_text_truth():
+def test_free_text_truth_must_be_in_linked_element():
     rows = [TruthRow(10, 10, "the inside", "x^2+1")]
     d = doc([ph("p1", "the inside", 10)], [resolved("p1", "e1", 0.9, quote="(x^2 + 1)")])
     assert score_doc(rows, d).judged[0].outcome == "correct"
+
+
+def test_model_quote_cannot_rescue_a_wrong_link():
+    """Regression: wrong element + short quote contained in the truth was scored correct."""
+    rows = [TruthRow(10, 10, "this", "(x^2+1)^3")]
+    d = doc([ph("p1", "this", 10)], [resolved("p1", "e2", 0.9, quote="x")])  # e2 = x^3
+    j = score_doc(rows, d).judged[0]
+    assert j.outcome == "wrong" and j.confident_wrong
 
 
 def test_one_phrase_per_row_nearest_in_time():

@@ -9,8 +9,8 @@ judged against the doc's Resolution for it:
 - confident_wrong  wrong with confidence >= 0.7 (a subset of wrong; the number that must be 0)
 
 Truth is either an element id (`e3`, exact; best for pipeline runs) or the referent as
-written (free text, matched by normalized containment against the element's content,
-spoken reading, or the resolution quote). A "possibly" suggestion is not a link, so it
+written (free text, which must appear in the linked element's content or spoken reading;
+the model's quote is never trusted for scoring). A "possibly" suggestion is not a link, so it
 counts as unresolved. The baseline is a plain transcript: it resolves nothing.
 """
 
@@ -166,15 +166,19 @@ def match_rows(rows: list[TruthRow], phrases: list[ReferencePhrase],
 
 
 def is_truth_referent(truth: str, res: Resolution, doc: LectureDoc) -> bool:
+    """Strict on purpose: fuzziness must count against the system, never for it.
+
+    The truth must appear in the LINKED ELEMENT itself (content or spoken reading). The
+    model's own quote is never used: a short quote like "x" is contained in almost any
+    truth and would turn a confidently wrong link into a "correct" one.
+    """
     if _ID.match(truth.strip()):
         return res.element_id == truth.strip()
     want = _norm_math(truth)
     el = next((e for e in doc.elements if e.id == res.element_id), None)
-    texts = [res.quote] + ([el.content, el.spoken] if el else [])
-    for text in map(_norm_math, texts):
-        if want and text and (want in text or text in want):
-            return True
-    return False
+    if not want or el is None:
+        return False
+    return any(want in _norm_math(t) for t in (el.content, el.spoken) if t)
 
 
 def judge(row: TruthRow, phrase: ReferencePhrase | None, doc: LectureDoc) -> Judged:
