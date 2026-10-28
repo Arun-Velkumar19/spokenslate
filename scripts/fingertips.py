@@ -2,7 +2,7 @@
 
     python scripts/fingertips.py clip.mp4 --out fingertips.json            # 10 fps
     python scripts/fingertips.py clip.mp4 --out fingertips.json --fps 5
-    python -m paperos process clip.mp4 --words words.json --fingertips fingertips.json ...
+    python -m spokenslate process clip.mp4 --words words.json --fingertips fingertips.json ...
 
 Writes [[t, u, v], ...]: t in seconds, u = x/width, v = y/height of MediaPipe landmark 8.
 Coords are frame-normalized; for a fixed lecture camera they serve as board coords (no
@@ -21,8 +21,8 @@ from pathlib import Path
 
 import numpy as np
 
-from paperos.sensing.hand import DEFAULT_MODEL_PATH, HandDetector, HandTracker
-from paperos.video import iter_frames
+from spokenslate.sensing.hand import DEFAULT_MODEL_PATH, HandDetector, HandTracker
+from spokenslate.video import iter_frames
 
 
 def track(frames: Iterable[tuple[float, np.ndarray]], tracker: HandTracker) -> list[list[float]]:

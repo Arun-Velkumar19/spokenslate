@@ -1,7 +1,7 @@
 """Shared fixtures modeled on the Oct 27 playground test (Professor Leonard, Calc 2 Lecture 6.1)."""
 
-from paperos.spec import BoardDiff, BoardElement, Region, Word
-from paperos.timeline import Timeline
+from spokenslate.spec import BoardDiff, BoardElement, Region, Word
+from spokenslate.timeline import Timeline
 
 
 def el(eid, content, x0, y0, x1, y1, spoken="", kind="math"):

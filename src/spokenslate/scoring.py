@@ -21,7 +21,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from paperos.spec import LectureDoc, ReferencePhrase, Resolution
+from spokenslate.spec import LectureDoc, ReferencePhrase, Resolution
 
 CONFIDENT = 0.7
 OUTCOMES = ("correct", "unresolved", "wrong")
@@ -192,7 +192,7 @@ def judge(row: TruthRow, phrase: ReferencePhrase | None, doc: LectureDoc) -> Jud
 
 def score_doc(rows: list[TruthRow], doc: LectureDoc, tol: float = 5.0) -> Score:
     matched = match_rows(rows, doc.phrases, tol)
-    return Score("seed", [judge(r, matched.get(i), doc) for i, r in enumerate(rows)])
+    return Score("spokenslate", [judge(r, matched.get(i), doc) for i, r in enumerate(rows)])
 
 
 def baseline(rows: list[TruthRow]) -> Score:

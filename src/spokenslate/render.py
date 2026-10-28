@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from html import escape
 
-from paperos.spec import LectureDoc, ReferencePhrase, Resolution, TimedElement, Word
+from spokenslate.spec import LectureDoc, ReferencePhrase, Resolution, TimedElement, Word
 
 CSS = """
 :root { color-scheme: light dark; --fg:#1b1b1b; --bg:#fdfdfb; --muted:#5d5d5d;

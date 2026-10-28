@@ -9,9 +9,9 @@ import cv2
 import numpy as np
 import pytest
 
-from paperos.pointing import pointing_at
-from paperos.sensing.hand import HandTracker
-from paperos.video import iter_frames
+from spokenslate.pointing import pointing_at
+from spokenslate.sensing.hand import HandTracker
+from spokenslate.video import iter_frames
 
 spec = importlib.util.spec_from_file_location(
     "fingertips", Path(__file__).parents[1] / "scripts" / "fingertips.py"
@@ -95,7 +95,7 @@ def test_cli_writes_json_the_process_command_reads(clip, tmp_path, monkeypatch):
     out = tmp_path / "fingertips.json"
     fingertips.main([str(clip), "--out", str(out), "--fps", "10"])
     assert detector.closed
-    # Same parsing as paperos.main._process
+    # Same parsing as spokenslate.main._process
     tips = [tuple(x) for x in json.loads(out.read_text())]
     assert [t for t, _, _ in tips] == pytest.approx([i / 10 for i in range(20) if (3 * i) % 4 != 3])
     point = pointing_at(tips, 1.0, 1.0, pad=0)   # source frame 30

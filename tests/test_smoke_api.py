@@ -10,7 +10,7 @@ import cv2
 import numpy as np
 import pytest
 
-from paperos.models.muse import MuseClient
+from spokenslate.models.muse import MuseClient
 
 spec = importlib.util.spec_from_file_location(
     "smoke_api", Path(__file__).parents[1] / "scripts" / "smoke_api.py"

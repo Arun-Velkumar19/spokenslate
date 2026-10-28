@@ -16,8 +16,8 @@ from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
 
-from paperos.models.prompts import board_prompt, resolve_prompt
-from paperos.spec import BoardDiff, ReferencePhrase, ResolveOutput, TimedElement
+from spokenslate.models.prompts import board_prompt, resolve_prompt
+from spokenslate.spec import BoardDiff, ReferencePhrase, ResolveOutput, TimedElement
 
 T = TypeVar("T", bound=BaseModel)
 _FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.MULTILINE)

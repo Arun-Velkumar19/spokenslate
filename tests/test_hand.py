@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from paperos.sensing.hand import Fingertip, HandTracker, MediaPipeHandDetector
+from spokenslate.sensing.hand import Fingertip, HandTracker, MediaPipeHandDetector
 
 
 def hand_result(x=0.25, y=0.75):

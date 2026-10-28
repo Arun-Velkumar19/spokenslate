@@ -1,4 +1,4 @@
-"""Seed pipeline: recorded lecture -> LectureDoc.
+"""SpokenSlate pipeline: recorded lecture -> LectureDoc.
 
 1. Board: sample frames, pick keyframes where the board changed, ask the board reader
    for a BoardDiff at each, apply to the Timeline (ids assigned here, never by the model).
@@ -16,11 +16,11 @@ import logging
 from dataclasses import dataclass, field
 from typing import Protocol
 
-from paperos.models.muse import FrameShot, ResolveRequest
-from paperos.models.segment import NullSegmenter, Segmenter, apply_mask
-from paperos.pointing import Sample, candidates, pointing_at
-from paperos.references import find_reference_phrases
-from paperos.spec import (
+from spokenslate.models.muse import FrameShot, ResolveRequest
+from spokenslate.models.segment import NullSegmenter, Segmenter, apply_mask
+from spokenslate.pointing import Sample, candidates, pointing_at
+from spokenslate.references import find_reference_phrases
+from spokenslate.spec import (
     BoardDiff,
     LectureDoc,
     ReferencePhrase,
@@ -29,14 +29,14 @@ from paperos.spec import (
     TimedElement,
     Word,
 )
-from paperos.timeline import DiffError, Timeline
-from paperos.validator import (
+from spokenslate.timeline import DiffError, Timeline
+from spokenslate.validator import (
     CONFIDENCE_THRESHOLD,
     LOOKAHEAD_S,
     LOOKBACK_S,
     validate_resolution,
 )
-from paperos.video import FrameSource, select_keyframes, thumbnail, to_jpeg
+from spokenslate.video import FrameSource, select_keyframes, thumbnail, to_jpeg
 
 log = logging.getLogger(__name__)
 

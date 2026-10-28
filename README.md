@@ -1,8 +1,8 @@
-# Seed (working name)
+# SpokenSlate
 
 **A lecture is two streams: what's said and what's written. Transcripts keep only one.**
 
-Seed turns a recorded whiteboard lecture into an accessible page: every board step as math,
+SpokenSlate turns a recorded whiteboard lecture into an accessible page: every board step as math,
 at the moment it was written, with spoken references like *"this term cancels"* linked to
 the exact thing on the board. When it isn't sure, it says so. Erased steps are kept.
 
@@ -33,7 +33,7 @@ pip install -e ".[dev]"
 cp .env.example .env            # add META_API_KEY
 pytest -q
 
-python -m paperos process lecture.mp4 --words words.json --out site/ \
+python -m spokenslate process lecture.mp4 --words words.json --out site/ \
   --title "Calculus 2, 6.1" --source "credit line"
 ```
 
@@ -50,7 +50,7 @@ the processor:
 
 ```bash
 python scripts/fingertips.py lecture.mp4 --out fingertips.json --fps 10
-python -m paperos process lecture.mp4 --words words.json --fingertips fingertips.json \
+python -m spokenslate process lecture.mp4 --words words.json --fingertips fingertips.json \
   --out site/ --title "Calculus 2, 6.1" --source "credit line"
 ```
 

@@ -14,8 +14,8 @@ from __future__ import annotations
 import re
 from difflib import SequenceMatcher
 
-from paperos.spec import ReferencePhrase, Resolution, ResolveOutput
-from paperos.timeline import Timeline
+from spokenslate.spec import ReferencePhrase, Resolution, ResolveOutput
+from spokenslate.timeline import Timeline
 
 CONFIDENCE_THRESHOLD = 0.7
 LOOKBACK_S = 0.0   # referent must still be on the board when the phrase starts...

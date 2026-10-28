@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import re
 
-from paperos.spec import ReferencePhrase, Word
+from spokenslate.spec import ReferencePhrase, Word
 
 NOUNS = {
     "term", "terms", "one", "ones", "problem", "equation", "line", "part", "piece", "guy",

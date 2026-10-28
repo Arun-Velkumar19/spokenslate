@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 
-from paperos.spec import BoardDiff, ResolveOutput, TimedElement
+from spokenslate.spec import BoardDiff, ResolveOutput, TimedElement
 
 
 def _schema(model) -> str:

@@ -1,13 +1,13 @@
 """Board timeline: apply per-keyframe BoardDiffs, answer "what was on the board at t".
 
-Erased elements stay in the timeline with erased_at set, which is how Seed keeps steps
+Erased elements stay in the timeline with erased_at set, which is how SpokenSlate keeps steps
 the lecturer wiped off. Diffs are applied atomically: an inconsistent diff (unknown id,
 reused id, erasing something already gone) raises DiffError and changes nothing.
 """
 
 from __future__ import annotations
 
-from paperos.spec import BoardDiff, TimedElement
+from spokenslate.spec import BoardDiff, TimedElement
 
 
 class DiffError(ValueError):

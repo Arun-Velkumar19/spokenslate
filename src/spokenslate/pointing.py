@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from statistics import median
 
-from paperos.spec import TimedElement
+from spokenslate.spec import TimedElement
 
 Sample = tuple[float, float, float]  # (t, u, v)
 
