@@ -90,7 +90,8 @@ def build_board(
     keys = select_keyframes(thumbs, min_gap_s=min_gap_s)
     # Pass 2: full-res frames at keyframes only; mask the lecturer, read the board.
     tl, next_n = Timeline(), 1
-    for t in keys:
+    log.info("board: %d keyframes from %d samples", len(keys), len(thumbs))
+    for k, t in enumerate(keys, 1):
         frame = source.frame_at(t)
         mask = clients.segmenter.person_mask(frame)
         stats.keyframes += 1
@@ -99,6 +100,8 @@ def build_board(
         diff, next_n = assign_ids(diff, next_n)
         try:
             tl.apply(diff, t)
+            log.info("board %d/%d at %.1fs: +%d updated %d erased %d", k, len(keys), t,
+                     len(diff.added), len(diff.updated), len(diff.erased))
         except DiffError as e:  # model contradicted itself; keep the last good board
             stats.rejected_diffs += 1
             log.warning("rejected board diff at %.1fs: %s", t, e)
@@ -147,10 +150,12 @@ def process(
     stats = Stats()
     tl = build_board(source, clients, stats)
     phrases = find_reference_phrases(words)
-    resolutions = [
-        resolve_phrase(p, words, source, tl, clients, stats, fingertips or [], threshold)
-        for p in phrases
-    ]
+    resolutions = []
+    for k, p in enumerate(phrases, 1):
+        r = resolve_phrase(p, words, source, tl, clients, stats, fingertips or [], threshold)
+        log.info("resolve %d/%d %r at %.1fs -> %s %s (%.2f)", k, len(phrases), p.text, p.start,
+                 r.status, r.element_id or "-", r.confidence)
+        resolutions.append(r)
     doc = LectureDoc(title=title, source=source_name, duration=source.duration, words=words,
                      elements=tl.all(), phrases=phrases, resolutions=resolutions,
                      models=models or {})

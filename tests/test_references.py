@@ -49,3 +49,12 @@ def test_anaphora_needs_a_pointer_back():
     assert texts("plug it into the equation from before") == [("the equation", "anaphora")]
     assert texts("the equation is linear") == []          # generic, not pointing back
     assert texts("the derivative of the inside") == [("the inside", "role")]
+
+
+def test_first_live_run_cases():
+    """From the Oct 29 Strang run: existential 'is there a', modifier + noun phrases."""
+    assert texts("box all three pivots. Is there a, I think that's") == []
+    assert texts("the three pivots are there. I know") == [("there.", "deictic")]
+    assert texts("This elimination step from A") == [("This elimination step", "deictic")]
+    assert texts("so this is the step") == [("this", "deictic")]           # 'is' isn't a modifier
+    assert texts("cover this with my hand") == [("this", "deictic")]

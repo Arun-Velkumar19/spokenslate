@@ -93,10 +93,16 @@ def _speech_html(
     return " ".join(out)
 
 
+def _id_num(eid: str) -> int:
+    digits = "".join(c for c in eid if c.isdigit())
+    return int(digits) if digits else 0
+
+
 def render_html(doc: LectureDoc) -> str:
     elements = {e.id: e for e in doc.elements}
     res = {r.phrase_id: r for r in doc.resolutions}
-    steps = sorted(doc.elements, key=lambda e: (e.first_seen, e.id))
+    # ids are e1, e2, ... ; sort numerically so e10 doesn't land between e1 and e2
+    steps = sorted(doc.elements, key=lambda e: (e.first_seen, _id_num(e.id), e.id))
     step_no = {e.id: n + 1 for n, e in enumerate(steps)}
 
     # speech before each step's first appearance belongs to the previous step's section

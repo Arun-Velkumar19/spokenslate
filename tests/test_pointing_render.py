@@ -47,3 +47,14 @@ def test_render_unresolved_says_so():
         update={"status": "unresolved", "element_id": None, "suggested_element_id": "e2"})
     html = render_html(doc)
     assert 'class="unresolved"' in html and "possibly step 2: d by dx of the cube root" in html
+
+
+def test_steps_seen_together_keep_numeric_order():
+    """Regression (Oct 29 run): string sort put e10 before e9 when seen at the same time."""
+    tl = leonard_timeline()
+    extra = [el(f"e{n}", f"x_{n}", .1, .1 * (n - 8), .2, .1 * (n - 8) + .05) for n in (9, 10)]
+    tl.apply(BoardDiff(added=extra), 200.0)
+    doc = LectureDoc(title="t", source="s", duration=210, words=[], elements=tl.all(),
+                     phrases=[], resolutions=[])
+    html = render_html(doc)
+    assert html.index('id="step-e9"') < html.index('id="step-e10"')
