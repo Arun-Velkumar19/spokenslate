@@ -130,8 +130,10 @@ python -m spokenslate render site/clip.json --out site/clip.html
   slow zooms between cuts). Each zoom re-reads the same rows as new elements (duplicates →
   the resolver rightly abstains) and can mark rows "erased". Test and demo on fixed-camera
   footage; camera-motion handling is out of scope unless Roon decides otherwise.
-- **Matrices are split into rows** by the current board prompt ("one element per line"), so
-  "this matrix" has no single target. A prompt change must come with before/after scores.
+- **Matrices are one element** (board prompt, Oct 29; rows are quoted with their `&`).
+  Scored on the Strang clip: correct links 4 → 6, confident-wrong 1 → 1 (a different,
+  debatable case), duplicates gone. Still open: a matrix written row by row (U) comes out as
+  separate row elements, and camera zooms still cause false "erased".
 - `objc: Class AVFFrameReceiver is implemented in both ...cv2... and ...av...` on macOS is a
   warning (OpenCV and PyAV both bundle FFmpeg). Runs completed fine; note it if a crash appears.
 - **Word timestamps are essential.** A point lines up with the words being said at that
