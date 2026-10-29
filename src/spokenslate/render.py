@@ -9,14 +9,19 @@ The page IS the product for a blind student, so structure matters more than look
 - erased steps are kept and labeled
 All model-produced text is escaped: it is untrusted.
 
-Math format (MathML vs LaTeX vs plain language) is still an open question for SAILS;
-for now each step carries LaTeX in <code> and the plain reading as the accessible label.
+Math steps are MathML (converted from the model's LaTeX and sanitized in mathml.py), so
+screen readers read and navigate them as math; `alttext` carries the plain reading for
+readers without math support. The plain reading is also shown for sighted readers but
+hidden from assistive tech so it isn't read twice, and the LaTeX source sits in a
+collapsed <details> for students who read LaTeX. If conversion fails or isn't safe, the
+step falls back to escaped LaTeX with the plain reading as its accessible label.
 """
 
 from __future__ import annotations
 
 from html import escape
 
+from spokenslate.mathml import latex_to_mathml
 from spokenslate.spec import LectureDoc, ReferencePhrase, Resolution, TimedElement, Word
 
 CSS = """
@@ -31,6 +36,9 @@ h1 { font-size: 1.6rem; } h2 { font-size: 1.15rem; margin-top: 2rem; }
 .board { border-left: 4px solid var(--accent); padding: .5rem .9rem; margin: .5rem 0;
          background: color-mix(in srgb, var(--accent) 7%, transparent); }
 .board code { font-size: 1.05rem; white-space: pre-wrap; }
+.board math { font-size: 1.35rem; }
+menclose[notation~="box"] { border: 1px solid currentColor; padding: 0 .2em; }  /* Chrome lacks menclose */
+.board details { font-size: .85rem; color: var(--muted); }
 .spoken { display: block; color: var(--muted); }
 .note { color: var(--muted); font-size: .9em; }
 .erased { border-left-color: var(--warn); }
@@ -93,6 +101,19 @@ def _speech_html(
     return " ".join(out)
 
 
+def _board_html(el: TimedElement) -> str:
+    cls = "board erased" if el.erased_at is not None else "board"
+    label = escape(el.spoken or el.content)
+    mathml = latex_to_mathml(el.content, alttext=el.spoken) if el.kind == "math" else None
+    if mathml is None:  # text/diagram steps, or LaTeX that didn't convert safely
+        return (f'<div class="{cls}" role="math" aria-label="{label}">'
+                f'<code>{escape(el.content)}</code><span class="spoken">{label}</span></div>')
+    return (f'<div class="{cls}">{mathml}'
+            f'<span class="spoken" aria-hidden="true">{label}</span>'
+            f"<details><summary>LaTeX</summary><code>{escape(el.content)}</code></details>"
+            "</div>")
+
+
 def _id_num(eid: str) -> int:
     digits = "".join(c for c in eid if c.isdigit())
     return int(digits) if digits else 0
@@ -121,14 +142,11 @@ def render_html(doc: LectureDoc) -> str:
             wi += 1
         erased = (f' <span class="meta">(erased at <time>{_ts(el.erased_at)}</time>;'
                   f" kept here)</span>" if el.erased_at is not None else "")
-        label = escape(el.spoken or el.content)
         speech = _speech_html(doc.words, lo, wi, doc.phrases, res, elements, step_no)
         sections.append(
             f'<section aria-labelledby="{_anchor(el.id)}">'
             f'<h2 id="{_anchor(el.id)}">Step {n + 1}, <time>{_ts(el.first_seen)}</time>{erased}</h2>'
-            f'<div class="board{" erased" if el.erased_at is not None else ""}" role="math" '
-            f'aria-label="{label}"><code>{escape(el.content)}</code>'
-            f'<span class="spoken">{label}</span></div>'
+            + _board_html(el)
             + (f'<p class="speech">{speech}</p>' if speech else "")
             + "</section>"
         )
