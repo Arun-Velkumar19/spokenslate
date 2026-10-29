@@ -15,6 +15,7 @@ dependencies = [
     "openai",          # Meta Model API is OpenAI-compatible (base https://api.meta.ai/v1)
     "pydantic>=2",
     "python-dotenv",
+    "faster-whisper",  # word timestamps (Muse Voice has none); local, no torch
 ]
 
 [project.optional-dependencies]
