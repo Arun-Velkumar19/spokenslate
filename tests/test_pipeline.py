@@ -113,3 +113,16 @@ def test_real_video_file_last_frame(tmp_path):
     assert abs(v.duration - 12.0) < 0.2
     assert v.frame_at(v.duration).shape == (360, 640, 3)
     assert v.frame_at(11.0)[115, 100].mean() < 80   # the line written at 10s is there
+
+
+def test_progress_is_logged(caplog):
+    import logging
+
+    ws = words("cover this now", start=59.0)
+    spark = FakeResolver(lambda r: ResolveOutput(element_id="e2", quote="ln x", confidence=0.9))
+    with caplog.at_level(logging.INFO, logger="spokenslate.pipeline"):
+        process(FakeVideo(), ws, Clients(board=FakeBoard(), resolver=spark),
+                title="t", source_name="s")
+    msgs = [r.getMessage() for r in caplog.records]
+    assert any(m.startswith("board 1/") for m in msgs)
+    assert any(m.startswith("resolve 1/1 'this'") and "resolved e2" in m for m in msgs)

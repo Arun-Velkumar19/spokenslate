@@ -62,7 +62,7 @@ fingertip track (hand.py) ──► pointing candidates ──┐          │  
 |---|---|
 | `spec.py`, `timeline.py`, `references.py`, `pointing.py`, `validator.py`, `render.py` | done, tested |
 | `pipeline.py`, `video.py`, `main.py` CLI | done, tested with fake models + a real mp4 |
-| `models/muse.py`, `models/prompts.py` | board read verified live Oct 28 (chat.completions, JPEG `image_url` data URL, `muse-spark-1.3` at `https://api.meta.ai/v1` → valid `BoardDiff`, 9.2s); `scripts/smoke_api.py IMAGE` packages that one call (logs the request minus key/bytes, raw reply, latency, parse); `resolve` **not yet run against the live API** |
+| `models/muse.py`, `models/prompts.py` | board read verified live Oct 28 (chat.completions, JPEG `image_url` data URL, `muse-spark-1.3` at `https://api.meta.ai/v1` → valid `BoardDiff`, 9.2s); `scripts/smoke_api.py IMAGE` packages that one call (logs the request minus key/bytes, raw reply, latency, parse); first full live run Oct 29 on an OCW 18.06 clip: 28 board + 15 resolve calls, 0 invalid JSON (see `eval/results/2026-10-29-strang-first-run.csv`) |
 | `scoring.py` + `scripts/score.py` | scores a LectureDoc against `eval/references.csv` (time window + phrase text; truth = element id or written referent) → correct / unresolved / wrong / confident-wrong, plus a plain-transcript baseline; tested on synthetic data; **not yet run on a real pipeline output** (CSV still empty) |
 | `models/transcribe.py` + `scripts/transcribe.py` | words from local **faster-whisper** (`word_timestamps=True`, VAD, `small.en`); `scripts/transcribe.py VIDEO --out words.json`; `process` without `--words` transcribes and saves `<out>/<stem>.words.json`; tested with fakes; **not yet run on a real clip** |
 | `models/segment.py` | `NullSegmenter` only; SAM 3.1 API shape **unverified** |
@@ -124,6 +124,14 @@ python -m spokenslate render site/clip.json --out site/clip.html
   only (`wss://api.meta.ai/v1/asr/realtime`); `POST /v1/audio/transcriptions` returns 404;
   the playground's Diarization/Endpointing modes give ~20 s turns at whole-second times.
   Words come from local faster-whisper instead. Don't retry the batch endpoint.
+- **Camera-operated lectures break the fixed-view assumption** (OCW 18.06: 98 cuts in 47 min,
+  slow zooms between cuts). Each zoom re-reads the same rows as new elements (duplicates →
+  the resolver rightly abstains) and can mark rows "erased". Test and demo on fixed-camera
+  footage; camera-motion handling is out of scope unless Roon decides otherwise.
+- **Matrices are split into rows** by the current board prompt ("one element per line"), so
+  "this matrix" has no single target. A prompt change must come with before/after scores.
+- `objc: Class AVFFrameReceiver is implemented in both ...cv2... and ...av...` on macOS is a
+  warning (OpenCV and PyAV both bundle FFmpeg). Runs completed fine; note it if a crash appears.
 - **Word timestamps are essential.** A point lines up with the words being said at that
   instant, not the whole sentence ("the problem I just gave you" vs "this problem" in one
   caption line meant opposite things). Captions-per-frame aren't enough.

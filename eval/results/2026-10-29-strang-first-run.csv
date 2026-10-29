@@ -1,0 +1,16 @@
+date,lecture,lecturer,t,phrase,kind,truth,model,answer,confidence,outcome,notes
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,6.1,This,deictic,"(2,1) elimination step",muse-spark-1.3,unresolved (possibly 0 2 -2),0.60,unresolved,"""This was the two-one step"""
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,15.6,this,deictic,row 1 2 1 (unchanged top row),muse-spark-1.3,unresolved (possibly 1 2 1),0.60,unresolved,"""this all stays the same. one-two-one"""
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,25.4,there.,deictic,several pivots (no single element),muse-spark-1.3,unresolved,0.35,abstain-ok,plural
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,26.4,this pivot,deictic,boxed 2,muse-spark-1.3,0 \boxed{2} -2 (quote \boxed{2}),0.85,correct,linked element is a camera-zoom duplicate of the same row
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,31.5,this equation,deictic,row 0 2 -2,muse-spark-1.3,unresolved (possibly 0 2 -2),0.60,unresolved,duplicate rows e9/e11 from camera zoom
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,33.4,this row,deictic,row 0 2 -2,muse-spark-1.3,0 \boxed{2} -2,0.85,correct,
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,35.4,this row,deictic,row 0 4 1,muse-spark-1.3,unresolved,0.30,unresolved,"""subtracted from this row""; duplicate rows"
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,47.4,there,deictic,the 1 in row 0 4 1,muse-spark-1.3,unresolved (possibly 0 4 1),0.60,unresolved,model derived 1-2*(-2)=5 correctly
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,50.8,this,deictic,row 0 2 -2,muse-spark-1.3,0 \boxed{2} -2,0.85,correct,"""subtracting twice this"""
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,54.0,there.,deictic,the 5 in 0 0 5,muse-spark-1.3,0 0 \boxed{5} (quote 5),0.95,correct,
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,64.2,there,deictic,none (existential 'is there a'),muse-spark-1.3,unresolved,0.90,false-positive,detector now skips 'is there a'
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,94.8,there.,deictic,three pivots (no single element),muse-spark-1.3,unresolved,0.30,abstain-ok,plural
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,100.4,this matrix,deictic,U (whole matrix),muse-spark-1.3,unresolved (possibly A),0.60,unresolved,matrices split into rows: no single target
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,101.7,This,deictic,the whole elimination A->U (no single element),muse-spark-1.3,(21) arrow,0.80,confident-wrong,"debatable; phrase now captured as ""This elimination step"""
+2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,104.8,this matrix,deictic,U (whole matrix),muse-spark-1.3,unresolved (possibly 0 0 5),0.60,unresolved,matrices split into rows

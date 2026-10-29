@@ -80,6 +80,8 @@ def main(argv: list[str] | None = None) -> None:
 
     args = p.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    for noisy in ("httpx", "httpx2", "openai", "huggingface_hub"):  # one line per HTTP call
+        logging.getLogger(noisy).setLevel(logging.WARNING)
     args.fn(args)
 
 

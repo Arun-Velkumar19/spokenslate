@@ -21,7 +21,9 @@ Part-time solo: count real hours per day and pull work earlier if weekdays are t
       ~20 s turns). Decision: local faster-whisper for words (`scripts/transcribe.py`).
 - [ ] **Segment**: SAM 3.1 "person" mask on a lecture frame; note request/response shape
 - [ ] **Abstention test**: 2–3 genuinely ambiguous moments; model must say unresolved
-- [ ] **Second lecturer** (MIT OCW 18.06 Strang, chalkboard): repeat 5 references
+- [x] **Second lecturer** (MIT OCW 18.06 Strang, chalkboard), Oct 29 first live run: 4 correct,
+      1 confident-wrong (debatable), 9 abstained of 15; camera-operated footage causes duplicate
+      rows. Benchmark + demo need fixed-camera footage (Roon recording).
 
 ## Calendar
 

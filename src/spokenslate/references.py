@@ -39,6 +39,15 @@ THAT_OBJECT_VERBS = {
 THAT_END = {"", "right", "over", "with", "up", "down", "there", "here"}
 # "there" as existential: "there's", "there is", "there are"
 EXISTENTIAL_AFTER = {"is", "are", "was", "were", "will", "might"}
+# "is there a ...?", "are there any ...": existential question, not a place
+EXISTENTIAL_Q_BEFORE = {"is", "are", "was", "were", "isnt", "arent"}
+EXISTENTIAL_Q_AFTER = {"a", "an", "any", "some", "no", "anything", "something"}
+# words that can't modify a noun, so "this <w> <noun>" is not one phrase ("this is the step")
+NOT_MODIFIER = {
+    "is", "was", "are", "were", "has", "had", "the", "a", "an", "and", "or", "but", "to", "of",
+    "in", "on", "with", "for", "it", "i", "we", "you", "he", "she", "they", "be", "gets", "get",
+    "goes", "will", "can", "would", "should", "times", "minus", "plus", "equals",
+}
 ROLE_SKIP_AFTER = {"time", "times", "place", "day", "week", "thing"}
 # "the <noun>" followed by one of these points back at something specific
 ANAPHORA_AFTER = {
@@ -64,8 +73,11 @@ def find_reference_phrases(words: list[Word]) -> list[ReferencePhrase]:
         span: tuple[int, int, str] | None = None
 
         if tok in DEMONSTRATIVES:
+            after = toks[i + 2] if i + 2 < len(toks) else ""
             if nxt in NOUNS:
                 span = (i, i + 2, "deictic")  # "this term", "that one"
+            elif after in NOUNS and nxt and nxt not in NOT_MODIFIER and nxt not in NOUNS:
+                span = (i, i + 3, "deictic")  # "this elimination step", "that upper row"
             elif tok != "that":
                 span = (i, i + 1, "deictic")  # bare "this"/"these"/"those"
             elif prev not in THAT_CONJ_BEFORE and (prev in THAT_OBJECT_VERBS or nxt in THAT_END):
@@ -74,6 +86,8 @@ def find_reference_phrases(words: list[Word]) -> list[ReferencePhrase]:
         elif tok in PLACES or tok in {"heres", "theres"}:
             if tok in {"there", "theres"} and (tok == "theres" or nxt in EXISTENTIAL_AFTER):
                 span = None
+            elif tok == "there" and prev in EXISTENTIAL_Q_BEFORE and nxt in EXISTENTIAL_Q_AFTER:
+                span = None  # "is there a ...?"
             elif prev in {"over", "right", "up", "down"}:
                 span = (i - 1, i + 1, "deictic")
             else:
