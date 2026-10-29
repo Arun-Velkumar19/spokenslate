@@ -20,7 +20,7 @@ class Settings:
     board_model: str = "muse-spark-1.3"      # reads the board each keyframe
     resolve_model: str = "muse-spark-1.3"    # resolves spoken references
     escalate_model: str = "muse-wonder-1.0"  # retry when Spark abstains (offline: speed ok)
-    transcribe_model: str = "muse-voice-transcribe-1.0"
+    whisper_model: str = "small.en"           # local faster-whisper (word timestamps)
     sam_model: str = ""                      # SAM 3.1 id on the Model API: verify
     confidence_threshold: float = 0.7
     # camera / page tools (scripts/page_preview.py, sensing/hand.py)
@@ -44,7 +44,7 @@ def load_settings() -> Settings:
         board_model=_env("BOARD_MODEL", "SEED", s.board_model),
         resolve_model=_env("RESOLVE_MODEL", "SEED", s.resolve_model),
         escalate_model=_env("ESCALATE_MODEL", "SEED", s.escalate_model),
-        transcribe_model=_env("TRANSCRIBE_MODEL", "SEED", s.transcribe_model),
+        whisper_model=os.getenv("SPOKENSLATE_WHISPER_MODEL") or s.whisper_model,
         sam_model=_env("SAM_MODEL", "SEED", ""),
         confidence_threshold=float(_env("CONFIDENCE_THRESHOLD", "SEED", "0.7")),
         camera_index=int(_env("CAMERA_INDEX", "PAPEROS", "0")),

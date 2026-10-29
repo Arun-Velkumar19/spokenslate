@@ -4,8 +4,8 @@
     python -m spokenslate render site/lecture.json --out site/lecture.html
 
 `process` writes <out>/<stem>.json (the LectureDoc) and <out>/<stem>.html (the page).
-Without --words it transcribes the audio (Muse Voice Transcribe; unverified, see
-models/transcribe.py).
+Without --words it transcribes locally with faster-whisper (word timestamps) and saves
+<out>/<stem>.words.json so later runs can pass --words and skip transcription.
 """
 
 from __future__ import annotations
@@ -13,7 +13,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import tempfile
 from pathlib import Path
 
 from spokenslate.config import load_settings
@@ -23,19 +22,20 @@ from spokenslate.spec import LectureDoc
 
 def _process(args: argparse.Namespace) -> None:
     from spokenslate.models.muse import MuseClient
-    from spokenslate.models.transcribe import MuseTranscriber, load_words
+    from spokenslate.models.transcribe import WhisperTranscriber, load_words, save_words
     from spokenslate.pipeline import Clients, process
-    from spokenslate.video import VideoFile, extract_audio
+    from spokenslate.video import VideoFile
 
     s = load_settings()
     video = Path(args.video)
     source = VideoFile(video)
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
     if args.words:
         words = load_words(Path(args.words))
     else:
-        with tempfile.TemporaryDirectory() as d:
-            wav = extract_audio(video, Path(d) / "audio.wav")
-            words = MuseTranscriber(s.api_key, s.base_url, s.transcribe_model).transcribe(wav)
+        words = WhisperTranscriber(s.whisper_model).transcribe(video)
+        save_words(words, out / f"{video.stem}.words.json")
     fingertips = [tuple(x) for x in json.loads(Path(args.fingertips).read_text())] \
         if args.fingertips else []
 
@@ -45,12 +45,11 @@ def _process(args: argparse.Namespace) -> None:
         escalate=MuseClient(s.api_key, s.base_url, s.escalate_model) if args.escalate else None,
     )
     models = {"board": s.board_model, "resolve": s.resolve_model,
-              "escalate": s.escalate_model if args.escalate else "", "words": "file" if args.words else s.transcribe_model}
+              "escalate": s.escalate_model if args.escalate else "",
+              "words": "file" if args.words else f"faster-whisper:{s.whisper_model}"}
     doc, stats = process(source, words, clients, title=args.title or video.stem,
                          source_name=args.source or video.name, fingertips=fingertips,
                          threshold=s.confidence_threshold, models=models)
-    out = Path(args.out)
-    out.mkdir(parents=True, exist_ok=True)
     (out / f"{video.stem}.json").write_text(doc.model_dump_json(indent=1))
     (out / f"{video.stem}.html").write_text(render_html(doc))
     print(f"{stats}\nwrote {out / video.stem}.json and .html")

@@ -18,7 +18,7 @@ Built first for blind and low-vision students, for whom "this term" is a dead en
 |---|---|---|
 | Lecturer masking | SAM 3.1 | so the board is read even when the professor stands in front of it |
 | Board reading | Muse Spark | each written line → LaTeX + plain-language reading, tracked over time |
-| Speech | Muse Voice Transcribe | words with timestamps |
+| Speech | (local faster-whisper) | words with word-level timestamps; Muse Voice Transcribe is realtime-only and has no word times |
 | Reference resolution | Muse Spark (Wonder as fallback) | "this term" → the specific board element, with evidence + confidence |
 
 Deterministic code assigns ids and times, finds reference phrases, ranks pointing candidates

@@ -8,16 +8,17 @@ Part-time solo: count real hours per day and pull work earlier if weekdays are t
 - **Impact 30%**: blind/low-vision students lose everything on the board. Evidence: SAILS
   conversation (emailed Oct 27), published "describe what you write" instructor guidance,
   benchmark numbers. Be honest: not yet tested with blind users.
-- **Meta tooling 25%**: SAM 3.1 + Muse Spark (+ Wonder escalation) + Voice Transcribe, each
-  essential. Unexpected capability: resolving a reference to something hidden under the hand.
+- **Meta tooling 25%**: SAM 3.1 + Muse Spark (+ Wonder escalation), each essential. Speech
+  timing is local faster-whisper (Muse Voice has no word times; stretch: Muse WebSocket
+  transcript + Meta MMS forced alignment). Unexpected capability: resolving a reference to something hidden under the hand.
 - **Technical 20%**: validated JSON contracts, timeline with erased content, hallucination
   guard, benchmark with abstention.
 - **Demo 25%**: hosted pages judges can open with a screen reader; VoiceOver in the video.
 
 ## Open verifications (do first, Oct 27)
 - [ ] Playground **Get code**: chat request shape with images, JSON mode → match `models/muse.py`
-- [ ] **Audio**: does Voice Transcribe return word-level timestamps? If not: decide fallback
-      (local Whisper is a new dependency → explicit decision)
+- [x] **Audio** (Oct 29): Muse Voice Transcribe has no word timestamps (realtime WebSocket only,
+      ~20 s turns). Decision: local faster-whisper for words (`scripts/transcribe.py`).
 - [ ] **Segment**: SAM 3.1 "person" mask on a lecture frame; note request/response shape
 - [ ] **Abstention test**: 2–3 genuinely ambiguous moments; model must say unresolved
 - [ ] **Second lecturer** (MIT OCW 18.06 Strang, chalkboard): repeat 5 references

@@ -30,7 +30,7 @@ Professor Leonard's Calc 2 lecture, incl. one hidden under his hand. See `eval/r
 ```
 video ──► thumbnails ──► keyframes (board changed) ──► SAM 3.1 masks lecturer ──► Muse: BoardDiff
                                                                                        │
-audio ──► Voice Transcribe ──► words w/ timestamps ──► reference phrases       Timeline (ids, times,
+audio ──► faster-whisper ───► words w/ timestamps ──► reference phrases       Timeline (ids, times,
                                        │                                         erased kept)
 fingertip track (hand.py) ──► pointing candidates ──┐          │                      │
                                                     ▼          ▼                      ▼
@@ -64,7 +64,7 @@ fingertip track (hand.py) ──► pointing candidates ──┐          │  
 | `pipeline.py`, `video.py`, `main.py` CLI | done, tested with fake models + a real mp4 |
 | `models/muse.py`, `models/prompts.py` | board read verified live Oct 28 (chat.completions, JPEG `image_url` data URL, `muse-spark-1.3` at `https://api.meta.ai/v1` → valid `BoardDiff`, 9.2s); `scripts/smoke_api.py IMAGE` packages that one call (logs the request minus key/bytes, raw reply, latency, parse); `resolve` **not yet run against the live API** |
 | `scoring.py` + `scripts/score.py` | scores a LectureDoc against `eval/references.csv` (time window + phrase text; truth = element id or written referent) → correct / unresolved / wrong / confident-wrong, plus a plain-transcript baseline; tested on synthetic data; **not yet run on a real pipeline output** (CSV still empty) |
-| `models/transcribe.py` | `load_words` works; Muse transcription **unverified** (word timestamps?) |
+| `models/transcribe.py` + `scripts/transcribe.py` | words from local **faster-whisper** (`word_timestamps=True`, VAD, `small.en`); `scripts/transcribe.py VIDEO --out words.json`; `process` without `--words` transcribes and saves `<out>/<stem>.words.json`; tested with fakes; **not yet run on a real clip** |
 | `models/segment.py` | `NullSegmenter` only; SAM 3.1 API shape **unverified** |
 | `sensing/hand.py` + `scripts/page_preview.py --hand` + `scripts/fingertips.py` | MediaPipe Tasks fingertip (landmark 8) + hand presence; `scripts/fingertips.py VIDEO --out fingertips.json [--fps 10]` writes the frame-normalized `[[t, u, v], ...]` track for `process --fingertips` (reads frames sequentially via `video.iter_frames`); tested with a fake detector + synthetic mp4 through the process CLI and pointing; **not yet run on a real lecture clip or camera** |
 | `calibration/page.py` | from PaperOS; page detection for camera setups (lecture video uses frame coords, see gotchas) |
@@ -120,6 +120,10 @@ python -m spokenslate render site/clip.json --out site/clip.html
 
 ## Gotchas already found (don't rediscover them)
 
+- **Muse Voice Transcribe can't give word times (checked Oct 29).** It is realtime WebSocket
+  only (`wss://api.meta.ai/v1/asr/realtime`); `POST /v1/audio/transcriptions` returns 404;
+  the playground's Diarization/Endpointing modes give ~20 s turns at whole-second times.
+  Words come from local faster-whisper instead. Don't retry the batch endpoint.
 - **Word timestamps are essential.** A point lines up with the words being said at that
   instant, not the whole sentence ("the problem I just gave you" vs "this problem" in one
   caption line meant opposite things). Captions-per-frame aren't enough.
