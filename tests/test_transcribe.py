@@ -65,3 +65,19 @@ def test_empty_transcript_is_an_error(monkeypatch):
     w.model = Model()
     with pytest.raises(RuntimeError, match="no speech"):
         w.transcribe(Path("silent.mp4"))
+
+
+def test_audio_decoding_works_with_installed_pyav(tmp_path):
+    """Regression: faster-whisper 1.2.1 + PyAV 19 fails in decode_audio (metadata_errors)."""
+    import wave
+
+    import numpy as np
+    from faster_whisper.audio import decode_audio
+
+    p = tmp_path / "silence.wav"
+    with wave.open(str(p), "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(16000)
+        w.writeframes(np.zeros(8000, np.int16).tobytes())
+    assert decode_audio(str(p)).shape == (8000,)
