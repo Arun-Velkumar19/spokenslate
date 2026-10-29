@@ -61,6 +61,7 @@ fingertip track (hand.py) ──► pointing candidates ──┐          │  
 | Module | State |
 |---|---|
 | `spec.py`, `timeline.py`, `references.py`, `pointing.py`, `validator.py`, `render.py` | done, tested |
+| `mathml.py` (used by `render.py`) | math steps render as MathML (`latex2mathml`, re-parsed against a MathML allowlist; unsafe or unknown LaTeX falls back to escaped code); `alttext` = plain reading; plain reading shown but `aria-hidden`; LaTeX source in `<details>`; **not yet checked with VoiceOver** |
 | `pipeline.py`, `video.py`, `main.py` CLI | done, tested with fake models + a real mp4 |
 | `models/muse.py`, `models/prompts.py` | board read verified live Oct 28 (chat.completions, JPEG `image_url` data URL, `muse-spark-1.3` at `https://api.meta.ai/v1` → valid `BoardDiff`, 9.2s); `scripts/smoke_api.py IMAGE` packages that one call (logs the request minus key/bytes, raw reply, latency, parse); first full live run Oct 29 on an OCW 18.06 clip: 28 board + 15 resolve calls, 0 invalid JSON (see `eval/results/2026-10-29-strang-first-run.csv`) |
 | `scoring.py` + `scripts/score.py` | scores a LectureDoc against `eval/references.csv` (time window + phrase text; truth = element id or written referent) → correct / unresolved / wrong / confident-wrong, plus a plain-transcript baseline; tested on synthetic data; **not yet run on a real pipeline output** (CSV still empty) |

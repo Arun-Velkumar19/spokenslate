@@ -16,6 +16,7 @@ dependencies = [
     "pydantic>=2",
     "python-dotenv",
     "faster-whisper",  # word timestamps (Muse Voice has none); local, no torch
+    "latex2mathml",    # board LaTeX -> MathML for screen readers (output sanitized)
     "av<19",           # PyAV 19 dropped av.open(metadata_errors=) that faster-whisper 1.2.1 passes
 ]
 
