@@ -16,6 +16,7 @@ dependencies = [
     "pydantic>=2",
     "python-dotenv",
     "faster-whisper",  # word timestamps (Muse Voice has none); local, no torch
+    "av<19",           # PyAV 19 dropped av.open(metadata_errors=) that faster-whisper 1.2.1 passes
 ]
 
 [project.optional-dependencies]

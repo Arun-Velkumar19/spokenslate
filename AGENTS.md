@@ -64,7 +64,7 @@ fingertip track (hand.py) ──► pointing candidates ──┐          │  
 | `pipeline.py`, `video.py`, `main.py` CLI | done, tested with fake models + a real mp4 |
 | `models/muse.py`, `models/prompts.py` | board read verified live Oct 28 (chat.completions, JPEG `image_url` data URL, `muse-spark-1.3` at `https://api.meta.ai/v1` → valid `BoardDiff`, 9.2s); `scripts/smoke_api.py IMAGE` packages that one call (logs the request minus key/bytes, raw reply, latency, parse); `resolve` **not yet run against the live API** |
 | `scoring.py` + `scripts/score.py` | scores a LectureDoc against `eval/references.csv` (time window + phrase text; truth = element id or written referent) → correct / unresolved / wrong / confident-wrong, plus a plain-transcript baseline; tested on synthetic data; **not yet run on a real pipeline output** (CSV still empty) |
-| `models/transcribe.py` + `scripts/transcribe.py` | words from local **faster-whisper** (`word_timestamps=True`, VAD, `small.en`); `scripts/transcribe.py VIDEO --out words.json`; `process` without `--words` transcribes and saves `<out>/<stem>.words.json`; tested with fakes; **not yet run on a real clip** |
+| `models/transcribe.py` + `scripts/transcribe.py` | words from local **faster-whisper** (`word_timestamps=True`, VAD, `small.en`); `scripts/transcribe.py VIDEO --out words.json`; `process` without `--words` transcribes and saves `<out>/<stem>.words.json`; verified on real speech Oct 29 (45 s clip → 115 words, first word at 0.98 s; `av<19` required) |
 | `models/segment.py` | `NullSegmenter` only; SAM 3.1 API shape **unverified** |
 | `sensing/hand.py` + `scripts/page_preview.py --hand` + `scripts/fingertips.py` | MediaPipe Tasks fingertip (landmark 8) + hand presence; `scripts/fingertips.py VIDEO --out fingertips.json [--fps 10]` writes the frame-normalized `[[t, u, v], ...]` track for `process --fingertips` (reads frames sequentially via `video.iter_frames`); tested with a fake detector + synthetic mp4 through the process CLI and pointing; **not yet run on a real lecture clip or camera** |
 | `calibration/page.py` | from PaperOS; page detection for camera setups (lecture video uses frame coords, see gotchas) |
@@ -97,7 +97,8 @@ docs/              PLAN, DEMO, PRIOR_ART
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
+python -m pip install -e ".[dev]"
+chflags nohidden .venv/lib/python3*/site-packages/*.pth   # macOS only, see gotchas
 pytest -q && ruff check src tests scripts          # both must pass before every commit
 python -m spokenslate process clip.mp4 --words words.json --out site/ --title "..." --source "credit"
 python -m spokenslate render site/clip.json --out site/clip.html
@@ -139,6 +140,9 @@ python -m spokenslate render site/clip.json --out site/clip.html
   Crop screenshots to the video (full-browser screenshots shrink the handwriting).
 - **Avoid `-contributor` model variants** until we know what they do with data. Free
   credits: Meta notes content may be used for product improvement.
+- **macOS hides the editable-install `.pth` file** (seen on Python 3.12 and 3.14 venvs), so
+  `No module named spokenslate` right after a successful `pip install -e`. Fix after every
+  install: `chflags nohidden .venv/lib/python3*/site-packages/*.pth`. Use `python -m pip`.
 - **MediaPipe 1.x removed `mp.solutions.hands`.** Use Tasks API `HandLandmarker`. The model
   file `models/hand_landmarker.task` is gitignored; download it from the
   [MediaPipe hand landmarker models](https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker#models).
