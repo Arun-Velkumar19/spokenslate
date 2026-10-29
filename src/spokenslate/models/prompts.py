@@ -37,8 +37,16 @@ The image is one moment of the lecture. The lecturer may be blocking part of the
 - erased: ids of existing elements that are now wiped off the board.
 Rules:
 - One element per written line or per distinct expression/diagram. Do not merge lines.
+- A matrix or array (numbers in brackets, or stacked in rows and columns) is ONE element,
+  not one per row: content \\begin{bmatrix}1 & 2 & 1 \\\\ 0 & \\boxed{2} & -2\\end{bmatrix}, with & between
+  entries, \\\\ between rows, and \\boxed{} on boxed entries.
 - content: exactly as written. Math in LaTeX. Do not fix the lecturer's math.
 - spoken: how a screen reader should say it, in plain words ("x squared plus one, cubed").
+  For a matrix, row by row ("matrix: row one: one, two, one; row two: zero, boxed two,
+  minus two").
+- The camera may zoom or pan between images. The same writing in a different place in the
+  image is NOT new: match it by content and keep its id. Do not report an element only
+  because its position in the image changed.
 - region: tight normalized box (0..1) around the element in this image.
 - If something is hidden by the lecturer, do NOT mark it erased. Hidden is not erased.
 - If nothing changed, return empty lists.
@@ -60,8 +68,10 @@ lecturer's fingertip near some elements, they are listed as pointing candidates.
 
 Answer with:
 - element_id: one id from the board list, or null if you cannot tell.
-- quote: the specific part of that element the phrase means, as written (may be a
-  sub-expression, e.g. "\\ln x" inside "(\\ln x)^{1/3}").
+- quote: the specific part of that element the phrase means, copied exactly from its
+  content (may be a sub-expression, e.g. "\\ln x" inside "(\\ln x)^{1/3}"). For a row or
+  entry of a matrix, copy that row or entry as it appears in the content, including the &
+  separators (e.g. "0 & \\boxed{2} & -2").
 - confidence: 0..1. Use < 0.7 whenever more than one element is plausible.
 - evidence: short reasons (pointing, hand position, order of writing, what was said
   before/after, math structure, earlier/later frames).
