@@ -54,3 +54,40 @@ def latex_to_mathml(latex: str, alttext: str = "") -> str | None:
     if alttext:
         root.set("alttext", alttext)
     return ET.tostring(root, encoding="unicode")
+
+
+_CMD_WORDS = {
+    "cdot": "times", "times": "times", "div": "divided by", "pm": "plus or minus",
+    "to": "to", "rightarrow": "to", "leftarrow": "from", "infty": "infinity",
+    "le": "less than or equal to", "leq": "less than or equal to", "ge": "at least",
+    "geq": "at least", "ne": "not equal to", "neq": "not equal to", "approx": "about",
+    "pi": "pi", "theta": "theta", "alpha": "alpha", "beta": "beta", "lambda": "lambda",
+    "ln": "ln", "log": "log", "sin": "sine", "cos": "cosine", "tan": "tangent",
+}
+
+
+def speakable(latex: str) -> str:
+    """Short LaTeX fragment (a quoted row or sub-expression) -> words a screen reader says
+    well: "0 & \\boxed{2} & -2" -> "0, boxed 2, minus 2". Deliberately small; anything it
+    doesn't know loses its backslash instead of being read as "backslash ..."."""
+    import re
+
+    s = latex
+    s = re.sub(r"\\begin\{[a-z]*matrix\}|\\end\{[a-z]*matrix\}", " ", s)
+    s = re.sub(r"\\boxed\{([^{}]*)\}", r" boxed \1 ", s)
+    s = re.sub(r"\\frac\{([^{}]*)\}\{([^{}]*)\}", r" \1 over \2 ", s)
+    s = re.sub(r"\\sqrt\[([^\]]*)\]\{([^{}]*)\}", r" root \1 of \2 ", s)
+    s = re.sub(r"\\sqrt\{([^{}]*)\}", r" square root of \1 ", s)
+    s = re.sub(r"\^\{([^{}]*)\}|\^(\w)", lambda m: f" to the {m.group(1) or m.group(2)} ", s)
+    s = re.sub(r"_\{([^{}]*)\}|_(\w)", lambda m: f" sub {m.group(1) or m.group(2)} ", s)
+    s = re.sub(r"\\(?:left|right)(?![A-Za-z])", " ", s)
+    s = re.sub(r"\\\\", " ; ", s)
+    s = s.replace("&", " , ")
+    s = re.sub(r"\\([A-Za-z]+)", lambda m: f" {_CMD_WORDS.get(m.group(1), m.group(1))} ", s)
+    s = re.sub(r"(^|[\s(,;=])-(?=\s*[\w(])", r"\1 minus ", s)
+    s = s.replace("+", " plus ").replace("=", " equals ").replace("{", " ").replace("}", " ")
+    s = re.sub(r"\s+", " ", s).strip()
+    s = re.sub(r"([(\[])\s+", r"\1", s)
+    s = re.sub(r"\s+([)\]])", r"\1", s)
+    s = re.sub(r"\s+([,;])", r"\1", s)
+    return re.sub(r"([,;])(?:[,;\s]+)", r"\1 ", s).strip(" ,;")

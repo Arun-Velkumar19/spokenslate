@@ -36,7 +36,7 @@ def test_render_structure_and_escaping():
     assert html.startswith("<!doctype html>") and '<html lang="en">' in html
     assert html.count("<h2") == 4                       # one heading per board step
     assert 'href="#step-e2"' in html                    # "this" links to the step it means
-    assert "(means ln x, in step 2: d by dx of the cube root of ln x)" in html
+    assert "(means ln x, in step 2)" in html               # part + step; link has the rest
     assert "erased at <time>2:00</time>" in html        # erased step kept and labeled
     assert "<script>" not in html and "&lt;script&gt;" in html
 
