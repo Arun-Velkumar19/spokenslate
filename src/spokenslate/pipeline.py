@@ -16,6 +16,8 @@ import logging
 from dataclasses import dataclass, field
 from typing import Protocol
 
+import numpy as np
+
 from spokenslate.models.muse import FrameShot, ResolveRequest
 from spokenslate.models.segment import NullSegmenter, Segmenter, apply_mask
 from spokenslate.pointing import Sample, candidates, pointing_at
@@ -36,7 +38,13 @@ from spokenslate.validator import (
     LOOKBACK_S,
     validate_resolution,
 )
-from spokenslate.video import FrameSource, select_keyframes, thumbnail, to_jpeg
+from spokenslate.video import (
+    FrameSource,
+    masked_board_diff,
+    select_keyframes,
+    thumbnail,
+    to_jpeg,
+)
 
 log = logging.getLogger(__name__)
 
@@ -64,6 +72,7 @@ class Stats:
     rejected_diffs: int = 0
     resolve_calls: int = 0
     escalations: int = 0
+    skipped_reads: int = 0  # candidate keyframes where only the lecturer moved (SAM gate)
 
 
 def assign_ids(diff: BoardDiff, next_n: int) -> tuple[BoardDiff, int]:
@@ -81,20 +90,30 @@ def words_between(words: list[Word], t0: float, t1: float) -> str:
 
 def build_board(
     source: FrameSource, clients: Clients, stats: Stats,
-    sample_every_s: float = 1.0, min_gap_s: float = 4.0,
+    sample_every_s: float = 1.0, min_gap_s: float = 4.0, gate_thresh: float = 1.5,
 ) -> Timeline:
     # Pass 1: cheap thumbnails only (a 3-min 1080p clip at full res would be ~1 GB).
     # No segmentation here: SAM per sample would be ~1 paid call per second of video.
     times = [i * sample_every_s for i in range(int(source.duration / sample_every_s) + 1)]
     thumbs = [(t, thumbnail(source.frame_at(t))) for t in times]
     keys = select_keyframes(thumbs, min_gap_s=min_gap_s)
-    # Pass 2: full-res frames at keyframes only; mask the lecturer, read the board.
+    # Pass 2: full-res frames at candidate keyframes only. Mask the lecturer; if the board
+    # itself (lecturer removed) hasn't changed since the last read, skip the paid read.
     tl, next_n = Timeline(), 1
+    last: tuple[np.ndarray, np.ndarray | None] | None = None
     log.info("board: %d keyframes from %d samples", len(keys), len(thumbs))
     for k, t in enumerate(keys, 1):
         frame = source.frame_at(t)
         mask = clients.segmenter.person_mask(frame)
         stats.keyframes += 1
+        if last is not None:
+            d = masked_board_diff(last[0], last[1], frame, mask)
+            if d is not None and d < gate_thresh:
+                stats.skipped_reads += 1
+                log.info("board %d/%d at %.1fs: skipped (only the lecturer moved, %.2f)",
+                         k, len(keys), t, d)
+                continue
+        last = (frame, mask)
         stats.board_calls += 1
         diff = clients.board.read_board(to_jpeg(apply_mask(frame, mask)), tl.alive_at(t))
         diff, next_n = assign_ids(diff, next_n)

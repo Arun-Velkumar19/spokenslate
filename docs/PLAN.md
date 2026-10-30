@@ -19,7 +19,8 @@ Part-time solo: count real hours per day and pull work earlier if weekdays are t
 - [ ] Playground **Get code**: chat request shape with images, JSON mode → match `models/muse.py`
 - [x] **Audio** (Oct 29): Muse Voice Transcribe has no word timestamps (realtime WebSocket only,
       ~20 s turns). Decision: local faster-whisper for words (`scripts/transcribe.py`).
-- [ ] **Segment**: SAM 3.1 "person" mask on a lecture frame; note request/response shape
+- [x] **Segment** (Oct 30): SAM 3.1 "person" mask on an OCW frame, c=0.977; Responses API +
+      `meta-sam-parser` (approved dependency). Wired as `MetaSAM` + board-read gate.
 - [ ] **Abstention test**: 2–3 genuinely ambiguous moments; model must say unresolved
 - [x] **Second lecturer** (MIT OCW 18.06 Strang, chalkboard), Oct 29 first live run: 4 correct,
       1 confident-wrong (debatable), 9 abstained of 15; camera-operated footage causes duplicate

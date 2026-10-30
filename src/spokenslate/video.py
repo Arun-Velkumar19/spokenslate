@@ -111,6 +111,26 @@ def _small_gray(frame: np.ndarray, width: int = 160) -> np.ndarray:
     return cv2.resize(g, None, fx=s, fy=s, interpolation=cv2.INTER_AREA).astype(np.float32)
 
 
+def masked_board_diff(
+    prev: np.ndarray, prev_mask: np.ndarray | None, cur: np.ndarray, cur_mask: np.ndarray | None,
+) -> float | None:
+    """Mean abs grey difference of the board between two frames, ignoring every pixel the
+    lecturer covers in either frame (same 160px thumbnail scale as select_keyframes).
+    None when either mask is unknown or nothing of the board is visible in both."""
+    if prev_mask is None or cur_mask is None:
+        return None
+    a, b = _small_gray(prev), _small_gray(cur)
+    size = (a.shape[1], a.shape[0])
+    covered = (cv2.resize(prev_mask, size, interpolation=cv2.INTER_NEAREST) > 0) | (
+        cv2.resize(cur_mask, size, interpolation=cv2.INTER_NEAREST) > 0)
+    # grow the person by a few pixels: shadows and anti-aliased edges move with them
+    covered = cv2.dilate(covered.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+    visible = ~covered
+    if visible.sum() == 0:
+        return None
+    return float(np.abs(a - b)[visible].mean())
+
+
 def select_keyframes(
     samples: list[tuple[float, np.ndarray]],
     masks: list[np.ndarray | None] | None = None,
