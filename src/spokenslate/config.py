@@ -21,7 +21,7 @@ class Settings:
     resolve_model: str = "muse-spark-1.3"    # resolves spoken references
     escalate_model: str = "muse-wonder-1.0"  # retry when Spark abstains (offline: speed ok)
     whisper_model: str = "small.en"           # local faster-whisper (word timestamps)
-    sam_model: str = ""                      # SAM 3.1 id on the Model API: verify
+    sam_model: str = "sam-3.1"               # lecturer mask (verified Oct 30); "" = off
     confidence_threshold: float = 0.7
     # camera / page tools (scripts/page_preview.py, sensing/hand.py)
     camera_index: int = 0
@@ -45,7 +45,7 @@ def load_settings() -> Settings:
         resolve_model=_env("RESOLVE_MODEL", "SEED", s.resolve_model),
         escalate_model=_env("ESCALATE_MODEL", "SEED", s.escalate_model),
         whisper_model=os.getenv("SPOKENSLATE_WHISPER_MODEL") or s.whisper_model,
-        sam_model=_env("SAM_MODEL", "SEED", ""),
+        sam_model=_env("SAM_MODEL", "SEED", s.sam_model),
         confidence_threshold=float(_env("CONFIDENCE_THRESHOLD", "SEED", "0.7")),
         camera_index=int(_env("CAMERA_INDEX", "PAPEROS", "0")),
         paper=_env("PAPER", "PAPEROS", s.paper),

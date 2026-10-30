@@ -22,6 +22,7 @@ from spokenslate.spec import LectureDoc
 
 def _process(args: argparse.Namespace) -> None:
     from spokenslate.models.muse import MuseClient
+    from spokenslate.models.segment import MetaSAM, NullSegmenter
     from spokenslate.models.transcribe import WhisperTranscriber, load_words, save_words
     from spokenslate.pipeline import Clients, process
     from spokenslate.video import VideoFile
@@ -43,8 +44,11 @@ def _process(args: argparse.Namespace) -> None:
         board=MuseClient(s.api_key, s.base_url, s.board_model),
         resolver=MuseClient(s.api_key, s.base_url, s.resolve_model),
         escalate=MuseClient(s.api_key, s.base_url, s.escalate_model) if args.escalate else None,
+        segmenter=(NullSegmenter() if args.no_sam or not s.sam_model
+                   else MetaSAM(s.api_key, s.base_url, s.sam_model)),
     )
     models = {"board": s.board_model, "resolve": s.resolve_model,
+              "segment": "" if args.no_sam else s.sam_model,
               "escalate": s.escalate_model if args.escalate else "",
               "words": "file" if args.words else f"faster-whisper:{s.whisper_model}"}
     doc, stats = process(source, words, clients, title=args.title or video.stem,
@@ -72,6 +76,8 @@ def main(argv: list[str] | None = None) -> None:
     pr.add_argument("--title")
     pr.add_argument("--source", help="credit line, e.g. 'MIT OCW 18.06, CC BY-NC-SA'")
     pr.add_argument("--escalate", action="store_true", help="retry unresolved with Wonder")
+    pr.add_argument("--no-sam", action="store_true",
+                    help="don't mask the lecturer with SAM 3.1 (saves 2 calls per keyframe)")
     pr.set_defaults(fn=_process)
     rd = sub.add_parser("render", help="re-render a saved LectureDoc JSON")
     rd.add_argument("doc")

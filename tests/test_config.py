@@ -12,4 +12,4 @@ def test_new_names_win_and_old_names_still_work(monkeypatch):
     assert s.board_model == "old" and s.camera_index == 2      # pre-rename .env keeps working
     monkeypatch.setenv("SPOKENSLATE_BOARD_MODEL", "new")
     assert load_settings().board_model == "new"                # new name wins
-    assert load_settings().sam_model == ""
+    assert load_settings().sam_model == "sam-3.1"                # verified Oct 30, on by default

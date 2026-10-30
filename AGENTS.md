@@ -50,7 +50,8 @@ fingertip track (hand.py) ──► pointing candidates ──┐          │  
 - **Erased content is kept** (`TimedElement.erased_at`), never deleted. Ids never reused.
 - **Offline only.** Recorded clips in, static pages out. No live classroom mode.
 - **Bounded spend.** No per-frame model calls; keyframes have a min gap; ≤2 attempts per
-  call; escalation to Wonder at most once per phrase. Log calls.
+  call; escalation to Wonder at most once per phrase; SAM only on candidate keyframes
+  (upload + segment, 1 attempt, failure = unmasked frame). Log calls.
 - **Footage rights.** Only commit your own recordings or openly licensed lectures (e.g.
   MIT OCW, CC BY-NC-SA, with credit). Never commit YouTube downloads. `data/` is gitignored.
 - **No scope creep:** no slides, no live mode, no dictation/two-way, no translation, no
@@ -66,7 +67,7 @@ fingertip track (hand.py) ──► pointing candidates ──┐          │  
 | `models/muse.py`, `models/prompts.py` | board read verified live Oct 28 (chat.completions, JPEG `image_url` data URL, `muse-spark-1.3` at `https://api.meta.ai/v1` → valid `BoardDiff`, 9.2s); `scripts/smoke_api.py IMAGE` packages that one call (logs the request minus key/bytes, raw reply, latency, parse); first full live run Oct 29 on an OCW 18.06 clip: 28 board + 15 resolve calls, 0 invalid JSON (see `eval/results/2026-10-29-strang-first-run.csv`) |
 | `scoring.py` + `scripts/score.py` | scores a LectureDoc against `eval/references.csv` (time window + phrase text; truth = element id or written referent) → correct / unresolved / wrong / confident-wrong, plus a plain-transcript baseline; tested on synthetic data; **not yet run on a real pipeline output** (CSV still empty) |
 | `models/transcribe.py` + `scripts/transcribe.py` | words from local **faster-whisper** (`word_timestamps=True`, VAD, `small.en`); `scripts/transcribe.py VIDEO --out words.json`; `process` without `--words` transcribes and saves `<out>/<stem>.words.json`; verified on real speech Oct 29 (45 s clip → 115 words, first word at 0.98 s; `av<19` required) |
-| `models/segment.py` | `NullSegmenter` only; SAM 3.1 API shape **unverified** |
+| `models/segment.py` | **SAM 3.1 verified Oct 30** (playground + 1 API call): upload frame (`/v1/files`) → `/v1/responses` with `sam-3.1`, "person" + file id → `<|box…|><|mask…|>` text, decoded with Meta's `meta-sam-parser`; real response kept as `tests/data/sam_person_480x352.txt`. `MetaSAM` on by default (`--no-sam` to skip; 2 calls per candidate keyframe; uploaded frame deleted after). Pipeline gate: candidate keyframe whose board (lecturer masked out) didn't change since the last read → Muse read skipped (synthetic walking lecturer: 18 → 3 reads). **Not yet run in a full live pipeline** |
 | `sensing/hand.py` + `scripts/page_preview.py --hand` + `scripts/fingertips.py` | MediaPipe Tasks fingertip (landmark 8) + hand presence; `scripts/fingertips.py VIDEO --out fingertips.json [--fps 10]` writes the frame-normalized `[[t, u, v], ...]` track for `process --fingertips` (reads frames sequentially via `video.iter_frames`); tested with a fake detector + synthetic mp4 through the process CLI and pointing; **not yet run on a real lecture clip or camera** |
 | `calibration/page.py` | from PaperOS; page detection for camera setups (lecture video uses frame coords, see gotchas) |
 

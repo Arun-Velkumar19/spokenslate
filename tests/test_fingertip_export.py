@@ -198,7 +198,7 @@ def test_exported_json_feeds_process_cli_pointing_candidates(tmp_path, monkeypat
     monkeypatch.setattr(main, "load_settings", Settings)
     out = tmp_path / "site"
     main.main(["process", str(clip), "--words", str(word_file), "--fingertips", str(track),
-               "--out", str(out)])
+               "--out", str(out), "--no-sam"])   # no network in tests
     assert len(json.loads(track.read_text())) == 10
     assert len(requests) == 1 and requests[0].candidates == [("e1", 0.0)]
     assert (out / "clip.html").is_file()

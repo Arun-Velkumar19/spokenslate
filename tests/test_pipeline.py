@@ -126,3 +126,43 @@ def test_progress_is_logged(caplog):
     msgs = [r.getMessage() for r in caplog.records]
     assert any(m.startswith("board 1/") for m in msgs)
     assert any(m.startswith("resolve 1/1 'this'") and "resolved e2" in m for m in msgs)
+
+
+class WalkingLecturer(FakeVideo):
+    """The FakeVideo board, plus a dark 'lecturer' that walks across it every 4 s."""
+
+    def frame_at(self, t):
+        f = super().frame_at(t)
+        x = int(40 + (t * 37) % 500)
+        f[150:350, x:x + 60] = 60
+        return f
+
+
+class BoxSegmenter:
+    """Perfect lecturer mask for WalkingLecturer."""
+
+    def __init__(self, video):
+        self.video, self.calls = video, 0
+
+    def person_mask(self, frame):
+        self.calls += 1
+        m = np.zeros(frame.shape[:2], np.uint8)
+        m[(frame[:, :, 0] == 60)] = 255
+        return m
+
+
+def test_sam_gate_skips_reads_when_only_the_lecturer_moved():
+    from spokenslate.pipeline import Stats, build_board
+
+    video = WalkingLecturer()
+    no_gate, gated = Stats(), Stats()
+    build_board(video, Clients(board=FakeBoard(), resolver=None), no_gate)
+    board = FakeBoard()
+    tl = build_board(video, Clients(board=board, resolver=None,
+                                    segmenter=BoxSegmenter(video)), gated)
+    assert no_gate.board_calls == no_gate.keyframes > 3    # walking triggers every candidate
+    assert gated.keyframes == no_gate.keyframes
+    assert gated.board_calls + gated.skipped_reads == gated.keyframes
+    assert gated.board_calls < no_gate.board_calls          # paid reads saved
+    assert gated.board_calls >= 3                            # 0 s, 10 s and 40 s writing still read
+    assert len(tl.all()) == 2                                # both lines still on the board
