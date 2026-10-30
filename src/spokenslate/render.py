@@ -9,19 +9,21 @@ The page IS the product for a blind student, so structure matters more than look
 - erased steps are kept and labeled
 All model-produced text is escaped: it is untrusted.
 
-Math steps are MathML (converted from the model's LaTeX and sanitized in mathml.py), so
-screen readers read and navigate them as math; `alttext` carries the plain reading for
-readers without math support. The plain reading is also shown for sighted readers but
-hidden from assistive tech so it isn't read twice, and the LaTeX source sits in a
-collapsed <details> for students who read LaTeX. If conversion fails or isn't safe, the
-step falls back to escaped LaTeX with the plain reading as its accessible label.
+Each step leads with the plain reading ("matrix: row one: boxed one, two, one"), read
+first by screen readers. VoiceOver testing (Oct 30) showed why it must not be hidden:
+VoiceOver reads MathML matrices as a navigable table but drops \\boxed, i.e. the pivots.
+Math steps then carry MathML (converted from the model's LaTeX and sanitized in mathml.py)
+for cell-by-cell exploration, and the LaTeX source in a collapsed <details>. Text steps
+show their text once. Quotes in reference notes are turned into words (mathml.speakable),
+so a screen reader says "zero, boxed two, minus two", not "ampersand backslash boxed".
 """
 
 from __future__ import annotations
 
+import re
 from html import escape
 
-from spokenslate.mathml import latex_to_mathml
+from spokenslate.mathml import latex_to_mathml, speakable
 from spokenslate.spec import LectureDoc, ReferencePhrase, Resolution, TimedElement, Word
 
 CSS = """
@@ -39,7 +41,8 @@ h1 { font-size: 1.6rem; } h2 { font-size: 1.15rem; margin-top: 2rem; }
 .board math { font-size: 1.35rem; }
 menclose[notation~="box"] { border: 1px solid currentColor; padding: 0 .2em; }  /* Chrome lacks menclose */
 .board details { font-size: .85rem; color: var(--muted); }
-.spoken { display: block; color: var(--muted); }
+.spoken { display: block; margin: 0 0 .3rem; }
+.written { display: block; }
 .note { color: var(--muted); font-size: .9em; }
 .erased { border-left-color: var(--warn); }
 a.ref { color: var(--accent); font-weight: 600; }
@@ -58,6 +61,23 @@ def _anchor(eid: str) -> str:
     return "step-" + "".join(c if c.isalnum() else "-" for c in eid)
 
 
+NOTE_MAX = 80  # characters of a step's reading repeated inside a reference note
+
+
+def _short(reading: str, limit: int = NOTE_MAX) -> str:
+    """A step's reading for a reference note: whole if short, else cut at a word + "…".
+    The link itself jumps to the step, so the note only has to identify it."""
+    reading = " ".join(reading.split())
+    if len(reading) <= limit:
+        return reading
+    return reading[:limit].rsplit(" ", 1)[0].rstrip(",;:") + "…"
+
+
+def _word(text: str) -> str:
+    # Whisper writes "One-two-one" as "One -two -one"; a screen reader says "dash two"
+    return re.sub(r"^-(?=[A-Za-z])", "", text)
+
+
 def _speech_html(
     words: list[Word],
     lo: int,
@@ -73,18 +93,18 @@ def _speech_html(
     while i < hi:
         p = starts.get(i)
         if p is None:
-            out.append(escape(words[i].text))
+            out.append(escape(_word(words[i].text)))
             i += 1
             continue
         text = escape(p.text)
         r = res.get(p.id)
         if r and r.status == "resolved" and r.element_id in elements:
             el = elements[r.element_id]
-            whole = el.spoken or el.content
-            # say the exact part ("ln x") when the quote is narrower than the whole step
-            part = r.quote if r.quote and len(r.quote) < len(el.content) * 0.6 else ""
-            label = escape(f"{part}, in step {step_no[el.id]}: {whole}" if part
-                           else f"step {step_no[el.id]}: {whole}")
+            # say the exact part ("ln x") when the quote is narrower than the whole step;
+            # then naming the step is enough (the link goes there)
+            part = speakable(r.quote) if r.quote and len(r.quote) < len(el.content) * 0.6 else ""
+            label = escape(f"{part}, in step {step_no[el.id]}" if part
+                           else f"step {step_no[el.id]}: {_short(el.spoken or el.content)}")
             out.append(f'<a class="ref" href="#{_anchor(el.id)}">{text}</a>'
                        f' <span class="note">(means {label})</span>')
         elif r:
@@ -92,7 +112,7 @@ def _speech_html(
             if r.suggested_element_id in elements:
                 sug = elements[r.suggested_element_id]
                 hint = (f"; possibly step {step_no[sug.id]}: "
-                        f"{escape(sug.spoken or sug.content)}")
+                        f"{escape(_short(sug.spoken or sug.content))}")
             out.append(f'<span class="unresolved">{text}</span>'
                        f' <span class="note">(unresolved{hint})</span>')
         else:
@@ -101,17 +121,28 @@ def _speech_html(
     return " ".join(out)
 
 
+def _same_text(a: str, b: str) -> bool:
+    return " ".join(a.lower().split()) == " ".join(b.lower().split())
+
+
 def _board_html(el: TimedElement) -> str:
     cls = "board erased" if el.erased_at is not None else "board"
-    label = escape(el.spoken or el.content)
-    mathml = latex_to_mathml(el.content, alttext=el.spoken) if el.kind == "math" else None
-    if mathml is None:  # text/diagram steps, or LaTeX that didn't convert safely
-        return (f'<div class="{cls}" role="math" aria-label="{label}">'
-                f'<code>{escape(el.content)}</code><span class="spoken">{label}</span></div>')
-    return (f'<div class="{cls}">{mathml}'
-            f'<span class="spoken" aria-hidden="true">{label}</span>'
-            f"<details><summary>LaTeX</summary><code>{escape(el.content)}</code></details>"
-            "</div>")
+    spoken = el.spoken.strip()
+    lead = f'<p class="spoken">{escape(spoken)}</p>' if spoken else ""
+    mathml = latex_to_mathml(el.content, alttext=spoken) if el.kind == "math" else None
+    if mathml is not None:
+        return (f'<div class="{cls}">{lead}{mathml}'
+                f"<details><summary>LaTeX</summary><code>{escape(el.content)}</code></details>"
+                "</div>")
+    if el.kind == "math":  # LaTeX that didn't convert safely: reading first, source after
+        return (f'<div class="{cls}">{lead}'
+                f"<details><summary>LaTeX</summary><code>{escape(el.content)}</code></details>"
+                "</div>")
+    if not spoken or _same_text(spoken, el.content):  # text written on the board: once
+        return f'<div class="{cls}"><p class="written">{escape(el.content)}</p></div>'
+    # annotation / diagram: reading first, then what was literally written
+    return (f'<div class="{cls}">{lead}<p class="written"><code>{escape(el.content)}</code>'
+            "</p></div>")
 
 
 def _id_num(eid: str) -> int:
