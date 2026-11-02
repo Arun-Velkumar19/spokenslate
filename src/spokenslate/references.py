@@ -76,7 +76,8 @@ def find_reference_phrases(words: list[Word]) -> list[ReferencePhrase]:
             after = toks[i + 2] if i + 2 < len(toks) else ""
             if nxt in NOUNS:
                 span = (i, i + 2, "deictic")  # "this term", "that one"
-            elif after in NOUNS and nxt and nxt not in NOT_MODIFIER and nxt not in NOUNS:
+            elif (after in NOUNS and nxt and nxt not in NOT_MODIFIER and nxt not in NOUNS
+                  and nxt not in DEMONSTRATIVES):
                 span = (i, i + 3, "deictic")  # "this elimination step", "that upper row"
             elif tok != "that":
                 span = (i, i + 1, "deictic")  # bare "this"/"these"/"those"
