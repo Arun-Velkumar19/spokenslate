@@ -108,3 +108,10 @@ def test_main_prints_and_logs(monkeypatch, tmp_path, capsys):
 def _with(muse, fake):
     muse.client = fake
     return muse
+
+
+def test_muse_calls_are_deterministic():
+    """temperature 0 on every attempt, including the JSON-repair retry."""
+    muse, fake = client("not json", json.dumps(DIFF))
+    muse.read_board(b"jpeg", [])
+    assert [c["temperature"] for c in fake.calls] == [0.0, 0.0]

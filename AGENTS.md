@@ -137,6 +137,9 @@ python -m spokenslate render site/clip.json --out site/clip.html
   separate row elements, and camera zooms still cause false "erased".
 - `objc: Class AVFFrameReceiver is implemented in both ...cv2... and ...av...` on macOS is a
   warning (OpenCV and PyAV both bundle FFmpeg). Runs completed fine; note it if a crash appears.
+- **Muse calls run at temperature 0** (Nov 1). The playground default is 1, so earlier runs
+  (Oct 29–30) were single random samples: a ±1 change between them may be noise. Benchmark
+  numbers come from temperature-0 runs.
 - **Word timestamps are essential.** A point lines up with the words being said at that
   instant, not the whole sentence ("the problem I just gave you" vs "this problem" in one
   caption line meant opposite things). Captions-per-frame aren't enough.
