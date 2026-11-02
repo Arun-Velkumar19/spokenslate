@@ -58,3 +58,9 @@ def test_first_live_run_cases():
     assert texts("This elimination step from A") == [("This elimination step", "deictic")]
     assert texts("so this is the step") == [("this", "deictic")]           # 'is' isn't a modifier
     assert texts("cover this with my hand") == [("this", "deictic")]
+
+
+def test_demonstrative_is_never_a_modifier():
+    """Nov 1 whiteboard run: "we can see that this function" came out as one phrase."""
+    assert texts("so we can see that this function is a product") == [("this function", "deictic")]
+    assert texts("similar to this first function") == [("this first function", "deictic")]
