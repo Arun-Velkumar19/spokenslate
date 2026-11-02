@@ -65,7 +65,8 @@ class CallLog:
 
 
 class MuseClient:
-    def __init__(self, api_key: str, base_url: str, model: str, max_attempts: int = 2) -> None:
+    def __init__(self, api_key: str, base_url: str, model: str, max_attempts: int = 2,
+                 temperature: float = 0.0) -> None:
         from openai import OpenAI
 
         if not api_key:
@@ -73,6 +74,9 @@ class MuseClient:
         self.client = OpenAI(api_key=api_key, base_url=base_url)
         self.model = model
         self.max_attempts = max_attempts
+        # 0 = the model's most likely answer every time, so benchmark runs are repeatable and
+        # a before/after difference measures the change, not sampling luck
+        self.temperature = temperature
         self.log: list[CallLog] = []
 
     def _call(self, kind: str, prompt: str, images: list[bytes], target: type[T]) -> T:
@@ -82,7 +86,8 @@ class MuseClient:
         ]
         t0, err = time.perf_counter(), ""
         for attempt in range(1, self.max_attempts + 1):
-            resp = self.client.chat.completions.create(model=self.model, messages=messages)
+            resp = self.client.chat.completions.create(
+                model=self.model, messages=messages, temperature=self.temperature)
             raw = resp.choices[0].message.content or ""
             try:
                 out = parse_json_as(target, raw)
