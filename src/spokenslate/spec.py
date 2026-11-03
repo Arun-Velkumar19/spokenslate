@@ -89,12 +89,24 @@ class BoardDiff(_Strict):
         return not (self.added or self.updated or self.erased)
 
 
+class PriorVersion(_Strict):
+    """What an element read as before an update replaced it. Pipeline-owned."""
+
+    kind: ElementKind
+    content: str
+    spoken: str = ""
+    replaced_at: float = Field(ge=0)
+
+
 class TimedElement(BoardElement):
     """A board element with pipeline-owned timing. Never produced by the model."""
 
     first_seen: float = Field(ge=0)
     last_updated: float = Field(ge=0)
     erased_at: float | None = None
+    # earlier readings, oldest first: a line wiped and rewritten often comes back from the
+    # model as an update of the same id, so updates keep what they replace (never deleted)
+    versions: list[PriorVersion] = Field(default_factory=list)
 
     def alive_at(self, t: float) -> bool:
         return self.first_seen <= t and (self.erased_at is None or t < self.erased_at)

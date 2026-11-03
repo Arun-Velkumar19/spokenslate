@@ -48,6 +48,8 @@ fingertip track (hand.py) ──► pointing candidates ──┐          │  
 - **Validator gates every resolution** (`validator.validate_resolution`): unknown id,
   element not on the board then, quote mismatch, low confidence → unresolved.
 - **Erased content is kept** (`TimedElement.erased_at`), never deleted. Ids never reused.
+  Updates keep the text they replace (`TimedElement.versions`); the page shows a version
+  only when it was replaced, not merely continued.
 - **Offline only.** Recorded clips in, static pages out. No live classroom mode.
 - **Bounded spend.** No per-frame model calls; keyframes have a min gap; ≤2 attempts per
   call; escalation to Wonder at most once per phrase; SAM only on candidate keyframes
@@ -145,6 +147,9 @@ python -m spokenslate render site/clip.json --out site/clip.html
   caption line meant opposite things). Captions-per-frame aren't enough.
 - **Offline is an advantage:** later frames can resolve earlier references (the model used
   frame 3 to resolve frame 1). Keep the lookahead.
+- **A wiped-and-rewritten line comes back as an update, not an erase** (Nov 3 mini clip:
+  `erased 0` on every read, the wrong f′(x) attempt replaced in place). Updates now keep
+  `versions`, so the wiped attempt is still on the page as an "earlier reading".
 - **Hidden ≠ erased.** The lecturer's body covers the board constantly. The board prompt
   says so; the timeline only erases on explicit model `erased`.
 - **Real video files:** the last frame is at `duration - 1/fps`; `VideoFile.frame_at` clamps.

@@ -1,13 +1,14 @@
 """Board timeline: apply per-keyframe BoardDiffs, answer "what was on the board at t".
 
 Erased elements stay in the timeline with erased_at set, which is how SpokenSlate keeps steps
-the lecturer wiped off. Diffs are applied atomically: an inconsistent diff (unknown id,
+the lecturer wiped off. Updates keep the text they replace in `versions`, because a line
+wiped and rewritten in place usually comes back as an update, not an erase. Diffs are applied atomically: an inconsistent diff (unknown id,
 reused id, erasing something already gone) raises DiffError and changes nothing.
 """
 
 from __future__ import annotations
 
-from spokenslate.spec import BoardDiff, TimedElement
+from spokenslate.spec import BoardDiff, PriorVersion, TimedElement
 
 
 class DiffError(ValueError):
@@ -49,8 +50,12 @@ class Timeline:
             self._elements[eid] = self._elements[eid].model_copy(update={"erased_at": t})
         for e in diff.updated:
             old = self._elements[e.id]
+            versions = list(old.versions)
+            if (old.content, old.kind) != (e.content, e.kind):
+                versions.append(PriorVersion(kind=old.kind, content=old.content,
+                                             spoken=old.spoken, replaced_at=t))
             self._elements[e.id] = TimedElement(
-                **e.model_dump(), first_seen=old.first_seen, last_updated=t
+                **e.model_dump(), first_seen=old.first_seen, last_updated=t, versions=versions
             )
         for e in diff.added:
             self._elements[e.id] = TimedElement(**e.model_dump(), first_seen=t, last_updated=t)

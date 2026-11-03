@@ -24,7 +24,14 @@ import re
 from html import escape
 
 from spokenslate.mathml import latex_to_mathml, speakable
-from spokenslate.spec import LectureDoc, ReferencePhrase, Resolution, TimedElement, Word
+from spokenslate.spec import (
+    LectureDoc,
+    PriorVersion,
+    ReferencePhrase,
+    Resolution,
+    TimedElement,
+    Word,
+)
 
 CSS = """
 :root { color-scheme: light dark; --fg:#1b1b1b; --bg:#fdfdfb; --muted:#5d5d5d;
@@ -127,22 +134,55 @@ def _same_text(a: str, b: str) -> bool:
 
 def _board_html(el: TimedElement) -> str:
     cls = "board erased" if el.erased_at is not None else "board"
-    spoken = el.spoken.strip()
+    return _reading_html(el.kind, el.content, el.spoken, cls) + _earlier_html(el)
+
+
+def _reading_html(kind: str, content: str, spoken: str, cls: str) -> str:
+    spoken = spoken.strip()
     lead = f'<p class="spoken">{escape(spoken)}</p>' if spoken else ""
-    mathml = latex_to_mathml(el.content, alttext=spoken) if el.kind == "math" else None
+    mathml = latex_to_mathml(content, alttext=spoken) if kind == "math" else None
     if mathml is not None:
         return (f'<div class="{cls}">{lead}{mathml}'
-                f"<details><summary>LaTeX</summary><code>{escape(el.content)}</code></details>"
+                f"<details><summary>LaTeX</summary><code>{escape(content)}</code></details>"
                 "</div>")
-    if el.kind == "math":  # LaTeX that didn't convert safely: reading first, source after
+    if kind == "math":  # LaTeX that didn't convert safely: reading first, source after
         return (f'<div class="{cls}">{lead}'
-                f"<details><summary>LaTeX</summary><code>{escape(el.content)}</code></details>"
+                f"<details><summary>LaTeX</summary><code>{escape(content)}</code></details>"
                 "</div>")
-    if not spoken or _same_text(spoken, el.content):  # text written on the board: once
-        return f'<div class="{cls}"><p class="written">{escape(el.content)}</p></div>'
+    if not spoken or _same_text(spoken, content):  # text written on the board: once
+        return f'<div class="{cls}"><p class="written">{escape(content)}</p></div>'
     # annotation / diagram: reading first, then what was literally written
-    return (f'<div class="{cls}">{lead}<p class="written"><code>{escape(el.content)}</code>'
+    return (f'<div class="{cls}">{lead}<p class="written"><code>{escape(content)}</code>'
             "</p></div>")
+
+
+_LATEX_NOISE = re.compile(r"\\[,;:! ]|\\left|\\right|[{}\s]")
+
+
+def _continues(earlier: str, later: str) -> bool:
+    """True if `later` is `earlier` with more written after it (ignoring LaTeX spacing)."""
+    return _LATEX_NOISE.sub("", later).startswith(_LATEX_NOISE.sub("", earlier))
+
+
+def replaced_versions(el: TimedElement) -> list[PriorVersion]:
+    """Earlier readings that were replaced, not just continued: a line wiped and rewritten,
+    or a misreading the model corrected. Partial reads of a line still being written are
+    left out (they are kept in the JSON)."""
+    out = []
+    for i, v in enumerate(el.versions):
+        nxt = el.versions[i + 1].content if i + 1 < len(el.versions) else el.content
+        if not _continues(v.content, nxt):
+            out.append(v)
+    return out
+
+
+def _earlier_html(el: TimedElement) -> str:
+    parts = []
+    for v in replaced_versions(el):
+        parts.append(f'<p class="meta">Earlier reading of this step, changed at '
+                     f'<time>{_ts(v.replaced_at)}</time>:</p>'
+                     + _reading_html(v.kind, v.content, v.spoken, "board erased"))
+    return "".join(parts)
 
 
 def _id_num(eid: str) -> int:
@@ -173,6 +213,8 @@ def render_html(doc: LectureDoc) -> str:
             wi += 1
         erased = (f' <span class="meta">(erased at <time>{_ts(el.erased_at)}</time>;'
                   f" kept here)</span>" if el.erased_at is not None else "")
+        if replaced_versions(el):
+            erased += ' <span class="meta">(changed; earlier reading kept)</span>'
         speech = _speech_html(doc.words, lo, wi, doc.phrases, res, elements, step_no)
         sections.append(
             f'<section aria-labelledby="{_anchor(el.id)}">'
