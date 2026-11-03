@@ -66,6 +66,10 @@ _CMD_WORDS = {
 }
 
 
+def _power(p: str) -> str:
+    return {"2": " squared ", "3": " cubed "}.get(p.strip(), f" to the {p} ")
+
+
 def speakable(latex: str) -> str:
     """Short LaTeX fragment (a quoted row or sub-expression) -> words a screen reader says
     well: "0 & \\boxed{2} & -2" -> "0, boxed 2, minus 2". Deliberately small; anything it
@@ -78,7 +82,7 @@ def speakable(latex: str) -> str:
     s = re.sub(r"\\frac\{([^{}]*)\}\{([^{}]*)\}", r" \1 over \2 ", s)
     s = re.sub(r"\\sqrt\[([^\]]*)\]\{([^{}]*)\}", r" root \1 of \2 ", s)
     s = re.sub(r"\\sqrt\{([^{}]*)\}", r" square root of \1 ", s)
-    s = re.sub(r"\^\{([^{}]*)\}|\^(\w)", lambda m: f" to the {m.group(1) or m.group(2)} ", s)
+    s = re.sub(r"\^\{([^{}]*)\}|\^(\w)", lambda m: _power(m.group(1) or m.group(2)), s)
     s = re.sub(r"_\{([^{}]*)\}|_(\w)", lambda m: f" sub {m.group(1) or m.group(2)} ", s)
     s = re.sub(r"\\(?:left|right)(?![A-Za-z])", " ", s)
     s = re.sub(r"\\\\", " ; ", s)
