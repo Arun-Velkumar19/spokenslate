@@ -80,3 +80,8 @@ def test_long_readings_are_cut_in_notes_and_dash_words_cleaned():
     cut = _short(long)
     assert cut.endswith("…") and len(cut) <= 81 and long.startswith(cut[:-1])
     assert [_word(w.text) for w in words("One -two -one -2")] == ["One", "two", "one", "-2"]
+
+
+def test_powers_read_naturally():
+    assert speakable("x^2") == "x squared"
+    assert speakable("x^{3} + y^n") == "x cubed plus y to the n"
