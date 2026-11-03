@@ -128,7 +128,10 @@ def masked_board_diff(
     visible = ~covered
     if visible.sum() == 0:
         return None
-    return float(np.abs(a - b)[visible].mean())
+    # phones auto-expose: a white shirt entering the frame darkens the whole board, which is
+    # not a board change. Match brightness on the visible board before comparing.
+    gain = float(np.median(a[visible])) / max(float(np.median(b[visible])), 1.0)
+    return float(np.abs(a - b * gain)[visible].mean())
 
 
 def select_keyframes(

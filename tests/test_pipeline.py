@@ -166,3 +166,26 @@ def test_sam_gate_skips_reads_when_only_the_lecturer_moved():
     assert gated.board_calls < no_gate.board_calls          # paid reads saved
     assert gated.board_calls >= 3                            # 0 s, 10 s and 40 s writing still read
     assert len(tl.all()) == 2                                # both lines still on the board
+
+
+
+class ExposingLecturer(WalkingLecturer):
+    """WalkingLecturer filmed by a phone that re-exposes as the lecturer moves (Nov 1 clip:
+    the bare wall swung between grey 165 and 232)."""
+
+    def frame_at(self, t):
+        f = super().frame_at(t).astype(np.float32)
+        gain = 0.8 + 0.2 * ((int(t) // 4) % 3) / 2            # 0.8, 0.9, 1.0, ...
+        out = np.clip(f * gain, 0, 255).astype(np.uint8)
+        out[f[:, :, 0] == 60] = 60                               # keep the 'lecturer' detectable
+        return out
+
+
+def test_sam_gate_ignores_auto_exposure():
+    from spokenslate.pipeline import Stats, build_board
+
+    video, stats = ExposingLecturer(), Stats()
+    tl = build_board(video, Clients(board=FakeBoard(), resolver=None,
+                                    segmenter=BoxSegmenter(video)), stats)
+    assert stats.skipped_reads > stats.keyframes // 2     # brightness swings are not writing
+    assert stats.board_calls >= 3 and len(tl.all()) == 2  # real writing still read
