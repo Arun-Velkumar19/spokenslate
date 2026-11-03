@@ -19,7 +19,7 @@ SpokenSlate takes a recorded lecture and produces an accessible web page:
   built to abstain rather than guess.
 - **Erased steps are kept** and labelled ("erased at 1:36, kept here").
 
-Live pages: ⟨TBD: GitHub Pages link⟩
+**Try it:** [arun-velkumar19.github.io/spokenslate](https://arun-velkumar19.github.io/spokenslate/), with two processed lectures and a guide to reading them with a screen reader.
 
 ## How it works
 
@@ -49,9 +49,23 @@ temperature 0 so results are repeatable.
 
 ## Results
 
-⟨TBD: benchmark table: whiteboard clip (18 references, incl. 3 deliberately ambiguous) and
-MIT OCW 18.06 excerpt (14 references) vs. a plain transcript; correct / unresolved /
-confident-wrong; source CSVs in `eval/results/`⟩
+Every spoken reference was labelled by hand before scoring. "Confident-wrong" means a wrong
+link at confidence ≥ 0.7, the failure that misleads a student. A plain transcript links none of
+these references.
+
+| Clip | References | Correct links | Confident-wrong | Unresolved |
+|---|---|---|---|---|
+| Whiteboard, own recording (fixed camera, temperature 0) | 16 | **11** | **0** | 5 |
+| MIT OCW 18.06 excerpt (camera-operated, chalk, 480p; single run at default temperature) | 14 | 7 | 2* | 5 (1 a correct abstention) |
+| *Plain transcript (either clip)* | *30* | *0* | *0* | *30* |
+
+\*Both are "the pivots are there" linked to the matrix that holds the boxed pivots. We count
+them as wrong because the label, set before matrices became single elements, said "no single
+element". On the whiteboard clip, all 5 unresolved references happened while the lecturer's
+shoulder hid the board and he wasn't pointing. The system's own evidence says so.
+
+Fingertip tracking matters: most correct links on the whiteboard clip cite *"pointing
+candidate, distance 0.00"*. Per-run CSVs and notes: [`eval/`](eval/README.md).
 
 Honest scope: two short clips, labels written by the author before scoring, and **not yet
 tested with blind users**. Treat these numbers as evidence the method works, not a study.
