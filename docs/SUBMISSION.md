@@ -1,7 +1,6 @@
 # Submission text (copy into the form)
 
-Every number here traces to a file in `eval/results/`. Fill the `TODO(mini)` row after the
-mini-clip run is scored, or delete it.
+Every number here traces to a file in `eval/results/`.
 
 ---
 
@@ -59,21 +58,22 @@ confidence below 0.7 → "unresolved". Calls run at temperature 0 so results rep
 
 ## Results
 
-Every spoken reference was labelled by hand before scoring. "Confident-wrong" = wrong link at
-confidence ≥ 0.7. A plain transcript links none of these references.
+Every spoken reference was labelled by hand, before scoring except on the erase clip.
+"Confident-wrong" = wrong link at confidence ≥ 0.7. A plain transcript links none of these references.
 
 | Clip | References | Correct | Confident-wrong | Unresolved |
 |---|---|---|---|---|
 | Own whiteboard recording (fixed camera) | 16 | 11 | 0 | 5 |
-| TODO(mini) Own recording with an erase and pointing | | | | |
+| Own recording with an erase (portrait phone video) | 5 | 3 | 0 | 2 |
 | MIT OCW 18.06 excerpt (camera-operated, 480p chalk) | 14 | 7 | 2* | 5 |
 
 \*Both are "the pivots are there" linked to the matrix holding the pivots, counted wrong under
 a strict label written before matrices became one element. On the whiteboard clip, all 5
-unresolved happened while the lecturer's shoulder hid the board.
+unresolved happened while the lecturer's shoulder hid the board. On the erase clip the wiped
+line is kept, but the board reader misread its text (small handwriting in a portrait video).
 
-Small numbers, labels by the author, not yet tested with blind users: evidence the method
-works, not a study.
+Small numbers (35 references), labels by the author, not yet tested with blind users:
+evidence the method works, not a study.
 
 ## Challenges
 

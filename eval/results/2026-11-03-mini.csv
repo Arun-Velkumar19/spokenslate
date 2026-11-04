@@ -1,0 +1,6 @@
+date,lecture,lecturer,t,phrase,kind,truth,model,answer,confidence,outcome,notes
+2026-11-03,"Product rule with an erase (own recording, Nov 3)",Arun Velkumar,8.3,this function,deictic,f(x) = x^3 ln x,"muse-spark-1.3 + sam-3.1 + fingertips, temperature 0",f(x)=x^3 \ln x (e1),0.95,correct,fingertip 0.00 on e1
+2026-11-03,"Product rule with an erase (own recording, Nov 3)",Arun Velkumar,21.9,That,deictic,the wrong f'(x) attempt (erased at ~0:28),"muse-spark-1.3 + sam-3.1 + fingertips, temperature 0",,,unresolved,"not detected as a phrase in this run (sentence-initial 'That is', detector fixed in #23)"
+2026-11-03,"Product rule with an erase (own recording, Nov 3)",Arun Velkumar,49.7,This,deictic,f'(x) = 3x^2 ln x + x^2,"muse-spark-1.3 + sam-3.1 + fingertips, temperature 0",f'(x)=3x^2 \ln x + x^2 (e3),0.90,correct,fingertip 0.00 on e3
+2026-11-03,"Product rule with an erase (own recording, Nov 3)",Arun Velkumar,53.3,this function,deictic,f(x) = x^3 ln x,"muse-spark-1.3 + sam-3.1 + fingertips, temperature 0",,0.65,unresolved,"suggested e1 (right) but below 0.7; fingertip 0.01 from e1, 0.02 from e3"
+2026-11-03,"Product rule with an erase (own recording, Nov 3)",Arun Velkumar,55.1,This,deictic,f'(x) = 3x^2 ln x + x^2 (the product-rule result),"muse-spark-1.3 + sam-3.1 + fingertips, temperature 0",f'(x)=3x^2 \ln x + x^2 (e3),0.85,correct,fingertip 0.00 on e3
