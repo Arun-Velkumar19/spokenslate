@@ -56,3 +56,13 @@ def test_old_json_without_versions_still_loads():
             "first_seen": 0, "last_updated": 0, "erased_at": None}
     e = TimedElement.model_validate(data)
     assert e.versions == [] and replaced_versions(e) == []
+
+
+def test_partial_read_missing_its_start_is_not_a_replacement():
+    # Nov 3 mini clip: the hand covered the "f", so the first read was "(x) ="
+    tl = Timeline()
+    tl.apply(BoardDiff(added=[el("e1", "(x) =", .3, .3, .4, .35)]), 4.0)
+    tl.apply(BoardDiff(updated=[el("e1", r"f(x)=x^3 \ln x", .3, .3, .5, .35)]), 8.0)
+    e = tl.get("e1")
+    assert [v.content for v in e.versions] == ["(x) ="]  # kept in the data
+    assert replaced_versions(e) == []                    # but not shown as a change

@@ -147,9 +147,14 @@ python -m spokenslate render site/clip.json --out site/clip.html
   caption line meant opposite things). Captions-per-frame aren't enough.
 - **Offline is an advantage:** later frames can resolve earlier references (the model used
   frame 3 to resolve frame 1). Keep the lookahead.
-- **A wiped-and-rewritten line comes back as an update, not an erase** (Nov 3 mini clip:
-  `erased 0` on every read, the wrong f′(x) attempt replaced in place). Updates now keep
-  `versions`, so the wiped attempt is still on the page as an "earlier reading".
+- **A wiped-and-rewritten line can come back as an update instead of an erase** (Nov 3
+  mini clip, two runs at temperature 0: run 1 replaced the wrong f′(x) in place, run 2
+  reported the erase). Temperature 0 is not fully deterministic. Updates keep `versions`,
+  so either way the wiped attempt survives; the page shows a version only if the new text
+  no longer contains it (a hand-covered partial read like "(x) =" is not a change).
+- **Small handwriting gets misread.** Portrait phone video, board ~half the frame width:
+  the wrong attempt `f'(x) = x^3 ln x · 1/x` was read as `f(x)=x^3 \ln x` (a copy of line 1).
+  Frames go to Muse at 1280 px on the long side; film landscape with the board filling it.
 - **Hidden ≠ erased.** The lecturer's body covers the board constantly. The board prompt
   says so; the timeline only erases on explicit model `erased`.
 - **Real video files:** the last frame is at `duration - 1/fps`; `VideoFile.frame_at` clamps.

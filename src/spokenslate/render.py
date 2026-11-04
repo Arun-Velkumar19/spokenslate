@@ -160,8 +160,9 @@ _LATEX_NOISE = re.compile(r"\\[,;:! ]|\\left|\\right|[{}\s]")
 
 
 def _continues(earlier: str, later: str) -> bool:
-    """True if `later` is `earlier` with more written after it (ignoring LaTeX spacing)."""
-    return _LATEX_NOISE.sub("", later).startswith(_LATEX_NOISE.sub("", earlier))
+    """True if `later` still contains all of `earlier` (ignoring LaTeX spacing): more was
+    written, or the first read missed a part the hand covered ("(x) =" -> "f(x) = x^3")."""
+    return _LATEX_NOISE.sub("", earlier) in _LATEX_NOISE.sub("", later)
 
 
 def replaced_versions(el: TimedElement) -> list[PriorVersion]:
