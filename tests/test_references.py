@@ -64,3 +64,12 @@ def test_demonstrative_is_never_a_modifier():
     """Nov 1 whiteboard run: "we can see that this function" came out as one phrase."""
     assert texts("so we can see that this function is a product") == [("this function", "deictic")]
     assert texts("similar to this first function") == [("this first function", "deictic")]
+
+
+def test_sentence_initial_that_is_a_reference():
+    # Nov 3 mini clip: the lecturer points at a wrong line and says "That is wrong."
+    assert texts("Let's differentiate this function. That is wrong.") \
+        == [("this function.", "deictic"), ("That", "deictic")]
+    assert texts("That is wrong.") == [("That", "deictic")]
+    # mid-sentence "that is" stays a conjunction / relative clause
+    assert texts("notice that is not zero") == []

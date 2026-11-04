@@ -37,6 +37,8 @@ THAT_OBJECT_VERBS = {
     "subtract", "factor", "cancel", "erase", "copy", "write", "call", "simplify", "times",
 }
 THAT_END = {"", "right", "over", "with", "up", "down", "there", "here"}
+# "That is wrong." at the start of a sentence: "that" is the subject, pointing at something
+THAT_SUBJECT_VERBS = {"is", "was", "isnt", "wasnt", "looks", "should", "cancels", "goes"}
 # "there" as existential: "there's", "there is", "there are"
 EXISTENTIAL_AFTER = {"is", "are", "was", "were", "will", "might"}
 # "is there a ...?", "are there any ...": existential question, not a place
@@ -83,6 +85,8 @@ def find_reference_phrases(words: list[Word]) -> list[ReferencePhrase]:
                 span = (i, i + 1, "deictic")  # bare "this"/"these"/"those"
             elif prev not in THAT_CONJ_BEFORE and (prev in THAT_OBJECT_VERBS or nxt in THAT_END):
                 span = (i, i + 1, "deictic")  # "cover that", "that right there"
+            elif nxt in THAT_SUBJECT_VERBS and (i == 0 or words[i - 1].text.rstrip()[-1:] in ".?!"):
+                span = (i, i + 1, "deictic")  # sentence-initial "That is wrong."
             # else: bare "that" is usually a conjunction ("so that", "notice that it")
         elif tok in PLACES or tok in {"heres", "theres"}:
             if tok in {"there", "theres"} and (tok == "theres" or nxt in EXISTENTIAL_AFTER):
