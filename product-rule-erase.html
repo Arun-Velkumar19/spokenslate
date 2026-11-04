@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The product rule, with an erased step (whiteboard)</title><style>
+:root { color-scheme: light dark; --fg:#1b1b1b; --bg:#fdfdfb; --muted:#5d5d5d;
+        --accent:#1d5fbf; --warn:#9a5b00; --line:#d9d9d4; }
+@media (prefers-color-scheme: dark) { :root { --fg:#ececec; --bg:#141414; --muted:#a8a8a8;
+        --accent:#7fb0ff; --warn:#f0b35c; --line:#333; } }
+body { font: 18px/1.6 system-ui, sans-serif; color: var(--fg); background: var(--bg);
+       max-width: 46rem; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+h1 { font-size: 1.6rem; } h2 { font-size: 1.15rem; margin-top: 2rem; }
+.meta, time { color: var(--muted); font-size: .9rem; }
+.board { border-left: 4px solid var(--accent); padding: .5rem .9rem; margin: .5rem 0;
+         background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.board code { font-size: 1.05rem; white-space: pre-wrap; }
+.board math { font-size: 1.35rem; }
+menclose[notation~="box"] { border: 1px solid currentColor; padding: 0 .2em; }  /* Chrome lacks menclose */
+.board details { font-size: .85rem; color: var(--muted); }
+.spoken { display: block; margin: 0 0 .3rem; }
+.written { display: block; }
+.note { color: var(--muted); font-size: .9em; }
+.erased { border-left-color: var(--warn); }
+a.ref { color: var(--accent); font-weight: 600; }
+.unresolved { text-decoration: underline dotted var(--warn); }
+p.speech { margin: .4rem 0; }
+</style></head><body><main><h1>The product rule, with an erased step (whiteboard)</h1><p class="meta">3 board steps · 4 spoken references, 3 resolved · source: Recorded by Arun Velkumar</p><section aria-labelledby="step-e1"><h2 id="step-e1">Step 1, <time>0:04</time></h2><div class="board"><p class="spoken">f of x equals x cubed natural log x</p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline" alttext="f of x equals x cubed natural log x"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>x</mi><mn>3</mn></msup><mi>ln</mi><mi>x</mi></mrow></math><details><summary>LaTeX</summary><code>f(x)=x^3 \ln x</code></details></div><p class="speech">Let&#x27;s differentiate <a class="ref" href="#step-e1">this function.</a> <span class="note">(means step 1: f of x equals x cubed natural log x)</span></p></section><section aria-labelledby="step-e2"><h2 id="step-e2">Step 2, <time>0:12</time> <span class="meta">(erased at <time>0:28</time>; kept here)</span></h2><div class="board erased"><p class="spoken">f of x equals x cubed natural log x</p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline" alttext="f of x equals x cubed natural log x"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>x</mi><mn>3</mn></msup><mi>ln</mi><mi>x</mi></mrow></math><details><summary>LaTeX</summary><code>f(x)=x^3 \ln x</code></details></div><p class="speech">That is wrong.</p></section><section aria-labelledby="step-e3"><h2 id="step-e3">Step 3, <time>0:32</time></h2><div class="board"><p class="spoken">f prime of x equals three x squared natural log x plus x squared</p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline" alttext="f prime of x equals three x squared natural log x plus x squared"><mrow><msup><mi>f</mi><mi>′</mi></msup><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mn>3</mn><msup><mi>x</mi><mn>2</mn></msup><mi>ln</mi><mi>x</mi><mo>+</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></math><details><summary>LaTeX</summary><code>f&#x27;(x)=3x^2 \ln x + x^2</code></details></div><p class="speech"><a class="ref" href="#step-e3">This</a> <span class="note">(means step 3: f prime of x equals three x squared natural log x plus x squared)</span> is the correct derivation of the <span class="unresolved">this function.</span> <span class="note">(unresolved; possibly step 1: f of x equals x cubed natural log x)</span> <a class="ref" href="#step-e3">This</a> <span class="note">(means step 3: f prime of x equals three x squared natural log x plus x squared)</span> is the product rule.</p></section></main></body></html>
