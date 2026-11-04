@@ -29,3 +29,8 @@ date,lecture,lecturer,t,phrase,kind,truth,model,answer,confidence,outcome,notes
 2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,100.4,this matrix,deictic,U (whole matrix),,,,,
 2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,101.7,This elimination step,deictic,the whole elimination A->U (no single element),,,,,
 2026-10-29,MIT OCW 18.06 L2 @7:37.6 (clip t),Strang,104.8,this matrix,deictic,U (whole matrix),,,,,
+2026-11-03,"Product rule with an erase (own recording, Nov 3)",Arun Velkumar,8.3,this function,deictic,f(x) = x^3 ln x,,,,,
+2026-11-03,"Product rule with an erase (own recording, Nov 3)",Arun Velkumar,21.9,That,deictic,the wrong f'(x) attempt (erased at ~0:28),,,,,
+2026-11-03,"Product rule with an erase (own recording, Nov 3)",Arun Velkumar,49.7,This,deictic,f'(x) = 3x^2 ln x + x^2,,,,,
+2026-11-03,"Product rule with an erase (own recording, Nov 3)",Arun Velkumar,53.3,this function,deictic,f(x) = x^3 ln x,,,,,
+2026-11-03,"Product rule with an erase (own recording, Nov 3)",Arun Velkumar,55.1,This,deictic,f'(x) = 3x^2 ln x + x^2 (the product-rule result),,,,,

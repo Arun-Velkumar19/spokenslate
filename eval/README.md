@@ -22,6 +22,7 @@ Raw video stays in `data/` (gitignored); reference lectures by title + timestamp
 | `results/2026-10-29-strang-matrix-prompt.csv` | same | 14 | 6 | 1 | 7 (2 correct abstentions) | matrix = one element |
 | `results/2026-10-30-strang-sam.csv` | same | 14 | 7 | 2 | 5 (1 correct abstention) | + SAM; both confident-wrongs are "the pivots are there" → the matrix holding them (strict label) |
 | `results/2026-11-01-whiteboard.csv` | own whiteboard recording | 16 | 11 | 0 | 5 | temperature 0, SAM, fingertips |
+| `results/2026-11-03-mini.csv` | own recording, wrong line erased and rewritten | 5 | 3 | 0 | 2 | **labels written after the run**; board 2/3 lines right: the erased attempt `f'(x)=x^3 ln x · 1/x` was read as `f(x)=x^3 ln x` (portrait video, small text) |
 
 A plain transcript links none of these references. The truth column in the Oct 29–Nov 1
 files is a description judged by hand (not an element-content string), so `scripts/score.py`
